@@ -6,7 +6,7 @@
   var META = {
     claude: { name: 'Claude', test: /^sk-ant-/ },
     openai: { name: 'ChatGPT', test: /^sk-/ },
-    gemini: { name: 'Gemini', test: /^AIza/ }
+    gemini: { name: 'Gemini', test: /^(AIza|AQ\.)/ }   // Google's new "auth keys" start with AQ.
   };
   var DEFAULT_MODELS = { claude: 'claude-sonnet-5-5', openai: 'gpt-5.6-sol', gemini: 'gemini-3.5-flash' };
   var LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -69,15 +69,23 @@
       });
       out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
     } else {
-      data = await doFetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
-        method: 'POST', signal: signal,
-        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: [{ role: 'user', parts: [{ text: user }] }],
-          generationConfig: { responseMimeType: 'application/json', maxOutputTokens: maxTokens || 16000 }
-        })
-      });
+      var callGemini = function (m) {
+        return doFetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(m) + ':generateContent', {
+          method: 'POST', signal: signal,
+          headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents: [{ role: 'user', parts: [{ text: user }] }],
+            generationConfig: { responseMimeType: 'application/json', maxOutputTokens: maxTokens || 16000 }
+          })
+        });
+      };
+      try { data = await callGemini(model); }
+      catch (ge) {
+        // if the model name is unknown, fall back to Google's always-current alias
+        if (ge && ge.kind === 'model' && model !== 'gemini-flash-latest') data = await callGemini('gemini-flash-latest');
+        else throw ge;
+      }
       var parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
       out = (parts || []).map(function (p) { return p.text || ''; }).join('');
     }
@@ -293,9 +301,9 @@
     return normalize(opts.fmt, r.data, opts);
   }
 
-  async function regenSlide(result, index, opts, keys, model, signal, onAttempt, onOk) {
+  async function regenSlide(result, index, opts, keys, model, signal, onAttempt, onOk, provider) {
     var p = slidePrompt(result, index, opts);
-    var r = await runWithKeys('claude', keys, model, p.system, p.user, signal, onAttempt, 3000, onOk);
+    var r = await runWithKeys(provider || 'claude', keys, model, p.system, p.user, signal, onAttempt, 3000, onOk);
     return normSlide(r.data);
   }
 

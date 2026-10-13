@@ -76,7 +76,7 @@
     hide($('#' + id));
     if (!$$('.modal:not(.hidden), .overlay:not(.hidden)').length) document.body.classList.remove('noscroll');
   }
-  function providerOf(fmt) { return fmt === 'pptx' ? 'claude' : S.prov; }
+  function providerOf() { return S.prov; }   // one AI for every format
   function aiName(p) { return AI.META[p].name; }
 
   /* ------------------------------------------------------------------ rendering of the home screen */
@@ -121,11 +121,24 @@
 
   function updateFormatUI() {
     $$('.fmt').forEach(function (b) { b.classList.toggle('active', b.dataset.fmt === S.fmt); });
-    $('#providerRow').classList.toggle('hidden', S.fmt === 'pptx');
+    renderProvNote();
     $('#countLabel').textContent = t(S.fmt === 'pptx' ? 'f.count.slides' : 'f.count.tasks');
     var c = COUNT[S.fmt], inp = $('#fCount');
     inp.min = c.min; inp.max = c.max;
     updateKeyHint();
+  }
+
+  function renderProvNote() {
+    var el = $('#provNote'); if (!el) return;
+    el.className = 'prov-note ' + S.prov;
+    el.textContent = t('prov.note.' + S.prov);
+  }
+
+  function setProvider(p) {
+    if (PROVIDERS.indexOf(p) < 0) return;
+    S.prov = p; saveSettings();
+    $$('#providerSeg button').forEach(function (b) { b.classList.toggle('active', b.dataset.prov === p); });
+    renderProvNote(); updateKeyHint();
   }
 
   function updateKeyHint() {
@@ -162,18 +175,24 @@
     buildTrackSelect();
     $('#ownName').textContent = Music.hasOwn ? t('music.fileChosen', { name: Music.ownName }) : '';
 
-    var html = PROVIDERS.map(function (p) {
-      var rows = [0, 1].map(function (i) {
-        return '<div class="key-row"><label class="key-lbl">' + esc(t(i ? 'set.key2' : 'set.key1')) + '</label>' +
-          '<div class="key-input"><input type="password" class="key-in" data-prov="' + p + '" data-idx="' + i + '" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(KEYS[p][i]) + '" placeholder="' + (p === 'claude' ? 'sk-ant-…' : (p === 'openai' ? 'sk-…' : 'AIza…')) + '">' +
-          '<button type="button" class="mini" data-act="eye">' + esc(t('btn.show')) + '</button>' +
-          '<button type="button" class="mini" data-act="testkey" data-prov="' + p + '" data-idx="' + i + '">' + esc(t('btn.test')) + '</button></div>' +
-          '<div class="key-status" data-status="' + p + i + '"></div></div>';
-      }).join('');
-      return '<div class="key-group"><div class="kg-head"><b>' + esc(aiName(p)) + '</b> <span class="soft">' + esc(t('set.usedfor.' + p)) + '</span>' +
-        '<a class="mini as-link" href="' + I18N.KEY_LINKS[p] + '" target="_blank" rel="noopener noreferrer">' + esc(t('set.getkey')) + '</a></div>' + rows + '</div>';
+    buildKeyGroups();
+  }
+
+  /* one AI at a time: pick it, then paste its two keys */
+  function buildKeyGroups() {
+    var p = S.prov;
+    var seg = '<div class="provider-row"><span class="lbl">' + esc(t('set.choose')) + '</span><div class="seg" id="setProvSeg">' +
+      ['gemini', 'openai', 'claude'].map(function (q) { return '<button type="button" data-prov="' + q + '" class="' + (q === p ? 'active' : '') + '">' + esc(aiName(q)) + '</button>'; }).join('') + '</div></div>';
+    var rows = [0, 1].map(function (i) {
+      return '<div class="key-row"><label class="key-lbl">' + esc(t(i ? 'set.key2' : 'set.key1')) + '</label>' +
+        '<div class="key-input"><input type="password" class="key-in" data-prov="' + p + '" data-idx="' + i + '" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(KEYS[p][i]) + '" placeholder="' + (p === 'claude' ? 'sk-ant-…' : (p === 'openai' ? 'sk-…' : 'AQ.… / AIza…')) + '">' +
+        '<button type="button" class="mini" data-act="eye">' + esc(t('btn.show')) + '</button>' +
+        '<button type="button" class="mini" data-act="testkey" data-prov="' + p + '" data-idx="' + i + '">' + esc(t('btn.test')) + '</button></div>' +
+        '<div class="key-status" data-status="' + p + i + '"></div></div>';
     }).join('');
-    $('#keyGroups').innerHTML = html;
+    $('#keyGroups').innerHTML = seg + '<div class="prov-note ' + p + '">' + esc(t('prov.note.' + p)) + '</div>' +
+      '<div class="key-group"><div class="kg-head"><b>' + esc(aiName(p)) + '</b>' +
+      '<a class="mini as-link" href="' + I18N.KEY_LINKS[p] + '" target="_blank" rel="noopener noreferrer">' + esc(t('set.getkey')) + '</a></div>' + rows + '</div>';
   }
 
   function buildTrackSelect() {
@@ -200,7 +219,9 @@
       lastGood[p] = key;
       setStatus(p, i, t('key.ok'), 'ok');
     } catch (e) {
-      setStatus(p, i, errorMessage(e), 'bad');
+      // show the real reason from the provider (short), so a wrong key / model / quota can be told apart
+      var why = e && e.detail ? ' (' + String(e.detail).replace(/\s+/g, ' ').slice(0, 140) + ')' : '';
+      setStatus(p, i, errorMessage(e) + why, 'bad');
     }
   }
 
@@ -360,12 +381,12 @@
 
   async function regenSlide(i) {
     if (RESULT.demo) { toast(t('res.demoNote')); return; }
-    var keys = activeKeys('claude');
-    if (!keys.length) { toast(t('err.nokey', { ai: 'Claude' })); buildSettings(); openModal('settings'); return; }
+    var prov = providerOf(), keys = activeKeys(prov);
+    if (!keys.length) { toast(t('err.nokey', { ai: aiName(prov) })); buildSettings(); openModal('settings'); return; }
     ABORT = new AbortController();
     startLoading('load.title.slide');
     try {
-      var s = await AI.regenSlide(RESULT, i, LAST_OPTS || readForm(), keys, S.models.claude, ABORT.signal, null, function (k) { lastGood.claude = k; });
+      var s = await AI.regenSlide(RESULT, i, LAST_OPTS || readForm(), keys, S.models[prov] || AI.DEFAULT_MODELS[prov], ABORT.signal, null, function (k) { lastGood[prov] = k; }, prov);
       RESULT.slides[i] = s;
       stopLoading(true);
       renderPreview(true); toast(t('toast.slideDone'));
@@ -462,7 +483,12 @@
         $('#fCount').value = COUNT[S.fmt].def; saveSettings(); updateFormatUI(); return;
       }
       var prov = el.closest('#providerSeg button');
-      if (prov) { S.prov = prov.dataset.prov; saveSettings(); $$('#providerSeg button').forEach(function (b) { b.classList.toggle('active', b === prov); }); updateKeyHint(); return; }
+      if (prov) { setProvider(prov.dataset.prov); return; }
+      var sprov = el.closest('#setProvSeg button');
+      if (sprov) {
+        $$('.key-in').forEach(function (inp) { KEYS[inp.dataset.prov][+inp.dataset.idx] = cleanKey(inp.value); });  // keep what was typed
+        setProvider(sprov.dataset.prov); buildKeyGroups(); return;
+      }
       var wt = el.closest('[data-wtype]');
       if (wt) { S.wtype = wt.dataset.wtype; saveSettings(); $$('#typeChips .chip').forEach(function (b) { b.classList.toggle('active', b === wt); }); $('#typeDesc').textContent = t('wt.' + S.wtype + '.d'); return; }
       var df = el.closest('#diffSeg button');

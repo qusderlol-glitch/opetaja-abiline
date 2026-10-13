@@ -65,30 +65,32 @@
           <span class="fmt-name">PowerPoint</span>
           <span class="fmt-ext">.pptx</span>
           <span class="fmt-desc" data-i18n="fmt.pptx.desc"></span>
-          <span class="fmt-ai">✨ Claude</span>
+          <span class="fmt-ai">✨ Gemini / ChatGPT / Claude</span>
         </button>
         <button class="fmt card selectable" data-fmt="docx">
           <span class="fmt-ico c-sky">📝</span>
           <span class="fmt-name">Word</span>
           <span class="fmt-ext">.docx</span>
           <span class="fmt-desc" data-i18n="fmt.docx.desc"></span>
-          <span class="fmt-ai">✨ ChatGPT / Gemini</span>
+          <span class="fmt-ai">✨ Gemini / ChatGPT / Claude</span>
         </button>
         <button class="fmt card selectable" data-fmt="xlsx">
           <span class="fmt-ico c-mint">📈</span>
           <span class="fmt-name">Excel</span>
           <span class="fmt-ext">.xlsx</span>
           <span class="fmt-desc" data-i18n="fmt.xlsx.desc"></span>
-          <span class="fmt-ai">✨ ChatGPT / Gemini</span>
+          <span class="fmt-ai">✨ Gemini / ChatGPT / Claude</span>
         </button>
       </div>
-      <div id="providerRow" class="provider-row hidden">
+      <div id="providerRow" class="provider-row">
         <span class="lbl" data-i18n="f.provider"></span>
         <div class="seg" id="providerSeg">
-          <button data-prov="openai">ChatGPT</button>
           <button data-prov="gemini">Gemini</button>
+          <button data-prov="openai">ChatGPT</button>
+          <button data-prov="claude">Claude</button>
         </div>
       </div>
+      <p id="provNote" class="prov-note"></p>
     </div>
 
     <!-- step 2 -->
