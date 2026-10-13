@@ -28,14 +28,18 @@
     return 'generic';
   }
 
+  /* timeoutMs: a service that is "overloaded" often just never answers, so we stop waiting and move on */
   async function doFetch(url, init) {
-    var res;
-    try { res = await fetch(url, init); }
+    var ctl = new AbortController(), timedOut = false, timer = null, res, text;
+    if (init.timeoutMs) timer = setTimeout(function () { timedOut = true; ctl.abort(); }, init.timeoutMs);
+    if (init.signal) { if (init.signal.aborted) ctl.abort(); else init.signal.addEventListener('abort', function () { ctl.abort(); }, { once: true }); }
+    var opts = Object.assign({}, init, { signal: ctl.signal }); delete opts.timeoutMs;
+    try { res = await fetch(url, opts); text = await res.text(); }
     catch (e) {
+      if (timedOut) throw AIError('busy', 0, 'no answer within ' + Math.round(init.timeoutMs / 1000) + ' s');
       if (e && e.name === 'AbortError') throw e;
       throw AIError('network', 0, e && e.message);
-    }
-    var text = await res.text();
+    } finally { clearTimeout(timer); }
     var data = null;
     try { data = JSON.parse(text); } catch (e) { /* not json */ }
     if (!res.ok) {
@@ -50,7 +54,7 @@
     var data, out;
     if (provider === 'claude') {
       data = await doFetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST', signal: signal,
+        method: 'POST', signal: signal, timeoutMs: 150000,
         headers: {
           'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-access': 'true'
@@ -60,7 +64,7 @@
       out = (data.content || []).filter(function (b) { return b.type === 'text'; }).map(function (b) { return b.text; }).join('');
     } else if (provider === 'openai') {
       data = await doFetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST', signal: signal,
+        method: 'POST', signal: signal, timeoutMs: 150000,
         headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
         body: JSON.stringify({
           model: model, response_format: { type: 'json_object' },
@@ -78,6 +82,9 @@
   /* ---------------- Gemini: many models, one key ----------------
      Google renames and overloads models often. If one model is busy / missing / out of quota,
      try Google's alias and then whatever Google's own model list offers, and remember what worked. */
+  var statusCb = null;
+  function status(msg) { if (statusCb) { try { statusCb(msg); } catch (e) { /* ignore */ } } }
+  var GEMINI_TRY_MS = 40000, GEMINI_MAX_TRIES = 5;
   var FALLBACK_KINDS = { model: 1, busy: 1, quota: 1 };
   var PRIORITY = { quota: 3, busy: 2, model: 1 };
 
@@ -95,7 +102,7 @@
     return parseFloat(v) * 10 - (/lite/.test(n) ? 1 : 0) - (/latest/.test(n) ? 0.5 : 0);
   }
   async function listGeminiModels(key, signal) {
-    var data = await doFetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', { signal: signal, headers: { 'x-goog-api-key': key } });
+    var data = await doFetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', { signal: signal, timeoutMs: 15000, headers: { 'x-goog-api-key': key } });
     return (data.models || []).filter(function (m) {
       return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0 && /flash/.test(m.name) &&
         !/image|tts|live|audio|embed|robot|computer|vision|preview|exp|learnlm|gemma|8b/.test(m.name);
@@ -107,13 +114,14 @@
     var good = readGood(), queue = [], tried = {}, n = 0, listed = false, best = null;
     if (good.model && good.cfg === model) queue.push(good.model);
     queue.push(model, 'gemini-flash-latest');
-    while (queue.length && n < 7) {
+    while (queue.length && n < GEMINI_MAX_TRIES) {
       var m = queue.shift();
       if (tried[m]) continue;
       tried[m] = 1; n++;
+      status({ model: m, n: n, max: GEMINI_MAX_TRIES });
       try {
         var data = await doFetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(m) + ':generateContent', {
-          method: 'POST', signal: signal,
+          method: 'POST', signal: signal, timeoutMs: GEMINI_TRY_MS,
           headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: system }] },
@@ -137,6 +145,37 @@
       }
     }
     throw best || AIError('generic');
+  }
+
+
+  /* "Find a working model": ask Google which models this key sees and try each with a tiny question. */
+  async function findGeminiModel(key, onProgress, signal) {
+    var cand = ['gemini-flash-latest'];
+    try {
+      var listed = await listGeminiModels(key, signal);
+      listed.forEach(function (m) { if (cand.indexOf(m) < 0) cand.push(m); });
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      if (e && e.kind === 'badkey') throw e;
+    }
+    ['gemini-2.5-flash', 'gemini-2.0-flash'].forEach(function (m) { if (cand.indexOf(m) < 0) cand.push(m); });
+    var lastErr = null;
+    for (var i = 0; i < cand.length && i < 10; i++) {
+      if (onProgress) onProgress({ model: cand[i], n: i + 1 });
+      try {
+        await doFetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(cand[i]) + ':generateContent', {
+          method: 'POST', signal: signal, timeoutMs: 15000,
+          headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+          body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Reply with the single word: ok' }] }], generationConfig: { maxOutputTokens: 64 } })
+        });
+        return cand[i];
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw e;
+        lastErr = e;
+        if (e && e.kind === 'badkey') throw e;
+      }
+    }
+    throw lastErr || AIError('model');
   }
 
   /* ChatGPT / Claude: a short pause and one or two more tries when the service says "busy" */
@@ -376,7 +415,8 @@
 
   window.AI = {
     META: META, DEFAULT_MODELS: DEFAULT_MODELS, LETTERS: LETTERS,
-    generate: generate, regenSlide: regenSlide, testKey: testKey,
+    generate: generate, regenSlide: regenSlide, testKey: testKey, findGeminiModel: findGeminiModel,
+    setStatus: function (fn) { statusCb = fn; },
     userPrompt: userPrompt, systemPrompt: systemPrompt, parseJson: parseJson, normalize: normalize, normTask: normTask,
     classify: classify
   };

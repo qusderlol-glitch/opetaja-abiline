@@ -19,7 +19,11 @@
     'err.busy': 'Tehisintellekt on praegu ülekoormatud. Proovisime mitut mudelit, aga kõik olid hõivatud.',
     'err.hint.busy': 'See on Google’i / teenuse poole probleem, mitte sinu võtme viga. Oota minut ja vajuta uuesti.',
     'set.page.sub': 'Siin on kõik, mida saab muuta: nimi, tehisintellekt, võtmed ja muusika.',
-    'set.sec.ai': 'Tehisintellekt ja võtmed'
+    'set.sec.ai': 'Tehisintellekt ja võtmed',
+    'load.try': 'Proovin mudelit {m} ({n}/{max}) …',
+    'set.findmodel': '🔎 Leia töötav mudel',
+    'set.findmodel.try': 'Proovin: {m} …',
+    'set.findmodel.ok': '✓ Töötab: {m}. Valisin selle sulle.'
   });
 
   Object.assign(S.ru, {
@@ -37,7 +41,11 @@
     'err.busy': 'ИИ сейчас перегружен. Мы попробовали несколько моделей, но все были заняты.',
     'err.hint.busy': 'Это проблема на стороне сервиса, а не вашего ключа. Подождите минуту и нажмите ещё раз.',
     'set.page.sub': 'Здесь всё, что можно изменить: имя, ИИ, ключи и музыка.',
-    'set.sec.ai': 'ИИ и ключи'
+    'set.sec.ai': 'ИИ и ключи',
+    'load.try': 'Пробую модель {m} ({n}/{max}) …',
+    'set.findmodel': '🔎 Найти рабочую модель',
+    'set.findmodel.try': 'Пробую: {m} …',
+    'set.findmodel.ok': '✓ Работает: {m}. Я выбрал её для вас.'
   });
 
   Object.assign(S.en, {
@@ -55,7 +63,11 @@
     'err.busy': 'The AI is overloaded right now. We tried several models and all of them were busy.',
     'err.hint.busy': 'This is a problem on the service’s side, not with your key. Wait a minute and press again.',
     'set.page.sub': 'Everything you can change is here: name, AI, keys and music.',
-    'set.sec.ai': 'AI and keys'
+    'set.sec.ai': 'AI and keys',
+    'load.try': 'Trying model {m} ({n}/{max}) …',
+    'set.findmodel': '🔎 Find a working model',
+    'set.findmodel.try': 'Trying: {m} …',
+    'set.findmodel.ok': '✓ Works: {m}. I picked it for you.'
   });
 
   /* ---- the arrow tour: go = which page to show, sel = what to point at ---- */

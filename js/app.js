@@ -214,7 +214,7 @@
         '<button type="button" class="mini" data-act="eye">' + esc(t('btn.show')) + '</button>' +
         '<button type="button" class="mini" data-act="testkey" data-prov="' + p + '" data-idx="' + i + '">' + esc(t('btn.test')) + '</button></div>' +
         '<div class="key-status" data-status="' + p + i + '"></div></div>';
-    }).join('');
+    }).join('') + (p === 'gemini' ? '<div class="key-row"><button type="button" class="mini" data-act="findmodel">' + esc(t('set.findmodel')) + '</button><div class="key-status" id="modelStatus"></div></div>' : '');
     $('#keyGroups').innerHTML = seg + '<div class="prov-note ' + p + '">' + esc(t('prov.note.' + p)) + '</div>' +
       '<div class="key-group"><div class="kg-head"><b>' + esc(aiName(p)) + '</b>' +
       '<a class="mini as-link" href="' + I18N.KEY_LINKS[p] + '" target="_blank" rel="noopener noreferrer">' + esc(t('set.getkey')) + '</a></div>' + rows + '</div>';
@@ -264,6 +264,22 @@
   }
   function saveFromSettings() { collectSettings(); toast(t('set.saved')); }
 
+  /* ask Google which model this key can really use right now, and pick it */
+  async function findModel() {
+    var st = $('#modelStatus'); if (!st) return;
+    var key = $$('.key-in').map(function (i) { return cleanKey(i.value); }).filter(Boolean)[0];
+    if (!key) { st.textContent = t('key.empty'); st.className = 'key-status bad'; return; }
+    st.className = 'key-status';
+    try {
+      var m = await AI.findGeminiModel(key, function (pr) { st.textContent = t('set.findmodel.try', { m: pr.model }); });
+      S.models.gemini = m; $('#modelGemini').value = m; saveSettings();
+      st.textContent = t('set.findmodel.ok', { m: m }); st.className = 'key-status ok';
+    } catch (e) {
+      var why = e && e.detail ? ' (' + String(e.detail).replace(/\s+/g, ' ').slice(0, 140) + ')' : '';
+      st.textContent = errorMessage(e) + why; st.className = 'key-status bad';
+    }
+  }
+
   /* ------------------------------------------------------------------ help page and the arrow tour */
   function renderHelp() {
     var steps = I18N.TUT[S.ui] || I18N.TUT.et;
@@ -299,6 +315,8 @@
   /* ------------------------------------------------------------------ loading screen */
   function startLoading(titleKey) {
     $('#loadTitle').textContent = t(titleKey || 'load.title');
+    $('#loadSub').textContent = '';
+    AI.setStatus(function (st) { $('#loadSub').textContent = t('load.try', { m: st.model, n: st.n, max: st.max }); });
     $('#loadBar').style.width = '2%';
     var msgs = I18N.LOADING[S.ui] || I18N.LOADING.et, mi = Math.floor(Math.random() * msgs.length);
     $('#loadMsg').textContent = msgs[mi];
@@ -317,6 +335,7 @@
   }
 
   function stopLoading(done) {
+    AI.setStatus(null);
     clearInterval(elapsedTimer); clearInterval(msgTimer);
     if (done) $('#loadBar').style.width = '100%';
     var finish = function () { hide($('#loading')); if (!$$('.modal:not(.hidden), .overlay:not(.hidden)').length) document.body.classList.remove('noscroll'); };
@@ -334,7 +353,7 @@
   function showError(e) {
     var old = $('#errorModal'); if (old) old.remove();
     var kind = e && e.kind;
-    var hint = (kind === 'quota' || kind === 'badkey') ? t('err.hint.' + kind) : '';
+    var hint = (kind === 'quota' || kind === 'badkey' || kind === 'busy') ? t('err.hint.' + kind) : '';
     var div = document.createElement('div');
     div.id = 'errorModal'; div.className = 'modal'; div.setAttribute('role', 'alertdialog'); div.setAttribute('aria-modal', 'true');
     div.innerHTML = '<div class="card modal-card small tilt-r"><div class="modal-head"><h2 class="hl">' + esc(t('err.title')) + '</h2></div>' +
@@ -529,6 +548,7 @@
           inp.type = vis ? 'password' : 'text'; act.textContent = t(vis ? 'btn.show' : 'btn.hide');
         }
         else if (a === 'testkey') testKey(act.dataset.prov, +act.dataset.idx);
+        else if (a === 'findmodel') findModel();
         else if (a === 'addb') {
           var i = +act.dataset.i; RESULT.slides[i].bullets.push('…'); renderPreview(true);
           var spans = $$('.ed[data-path^="slides.' + i + '.bullets."]'); var last = spans[spans.length - 1];
