@@ -397,9 +397,29 @@
     return { data: data, ext: 'xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
   }
 
+  /* The big libraries (about 2.7 MB together) are only fetched when a file is really built,
+     so the site itself opens fast, even on a slow school connection. */
+  var LIBS = { pptx: ['PptxGenJS', 'vendor/pptxgen.bundle.js'], docx: ['docx', 'vendor/docx.iife.js'], xlsx: ['ExcelJS', 'vendor/exceljs.min.js'] };
+  var loading = {};
+  function ensureLib(kind) {
+    var L = LIBS[kind];
+    if (!L || !IS_BROWSER || root[L[0]]) return Promise.resolve();
+    if (!loading[kind]) {
+      loading[kind] = new Promise(function (res, rej) {
+        var el = document.createElement('script');
+        el.src = L[1]; el.async = true;
+        el.onload = function () { root[L[0]] ? res() : rej(new Error('library missing: ' + L[0])); };
+        el.onerror = function () { delete loading[kind]; rej(new Error('could not load ' + L[1])); };
+        document.head.appendChild(el);
+      });
+    }
+    return loading[kind];
+  }
+
   var Build = {
     Deck: Deck, fileBase: fileBase, totalPoints: totalPoints, answerText: answerText,
-    make: function (r) {
+    make: async function (r) {
+      await ensureLib(r.kind);
       if (r.kind === 'pptx') return buildPptx(r);
       if (r.kind === 'docx') return buildDocx(r);
       return buildXlsx(r);

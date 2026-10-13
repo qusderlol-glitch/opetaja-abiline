@@ -10,15 +10,55 @@
 <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-sec="home">
 
-<!-- wobbly pencil-line filter -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
-    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
-    </filter>
+    <g id="ink" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></g>
+    <symbol id="i-home" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 23 L11 40.5 Q11 41.5 12 41.5 L36 41.5 Q37 41.5 37 40.5 L37 23 L24 11 Z" style="fill:var(--f-rose,#ffd3de)"/>
+      <path d="M6.5 25 L24 8.5 L41.5 25"/><path d="M32 14.5 V9 h4.5 v9.5"/>
+      <path d="M20 41.5 V31 Q20 29 22 29 H26 Q28 29 28 31 V41.5" style="fill:#fff"/></g></symbol>
+    <symbol id="i-wand" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 39 L11.5 30 L30.5 11 Q32.5 9 34.5 11 L37 13.5 Q39 15.5 37 17.5 L18 36.5 Z" style="fill:var(--f-sun,#fff0b3)"/>
+      <path d="M11.5 30 L18 36.5 L9 39 Z" style="fill:#fff"/><path d="M27 14.5 L33.5 21"/>
+      <path d="M40 5 v7 M36.5 8.5 h7"/><path d="M8 13 v5 M5.5 15.5 h5"/><path d="M41 28 v4 M39 30 h4"/></g></symbol>
+    <symbol id="i-doc" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 6.5 H30 L38.5 15 V41 Q38.5 42 37.5 42 H12 Q11 42 11 41 V7.5 Q11 6.5 12 6.5 Z" style="fill:var(--f-sky,#cfe6fb)"/>
+      <path d="M30 6.5 V15 H38.5" style="fill:#fff"/><path d="M16 23 H33 M16 29 H33 M16 35 H26"/></g></symbol>
+    <symbol id="i-gear" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 5.5 v5 M24 37.5 v5 M5.5 24 h5 M37.5 24 h5 M11 11 l3.5 3.5 M33.5 33.5 l3.5 3.5 M37 11 l-3.5 3.5 M14.5 33.5 l-3.5 3.5" stroke-width="4.6"/>
+      <circle cx="24" cy="24" r="13" stroke-width="2.6" style="fill:var(--f-lav,#e6dcfa)"/><circle cx="24" cy="24" r="5.5" stroke-width="2.6" style="fill:#fff"/></g></symbol>
+    <symbol id="i-help" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 11 Q8 7.5 11.5 7.5 H36.5 Q40 7.5 40 11 V28 Q40 31.5 36.5 31.5 H24.5 L15 40.5 V31.5 H11.5 Q8 31.5 8 28 Z" style="fill:var(--f-mint,#bfead6)"/>
+      <path d="M19 17.5 Q19 13 24 13 Q29 13 29 17.5 Q29 20.5 24 22.5 V24.5"/><path d="M24 28 v.4" stroke-width="3.4"/></g></symbol>
+    <symbol id="i-slides" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="8" width="36" height="25" rx="3" style="fill:#fff"/><path d="M24 4.5 V8"/>
+      <path d="M13 28 V21" stroke-width="4" style="stroke:#e56b8c"/><path d="M20 28 V15" stroke-width="4" style="stroke:#e0a526"/><path d="M27 28 V19" stroke-width="4" style="stroke:#5aa883"/><path d="M34 28 V12.5" stroke-width="4" style="stroke:#6f9fd9"/>
+      <path d="M24 33 V40 M15 43 L24 37 L33 43"/></g></symbol>
+    <symbol id="i-word" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 6.5 H30 L38.5 15 V41 Q38.5 42 37.5 42 H11 Q10 42 10 41 V7.5 Q10 6.5 11 6.5 Z" style="fill:#fff"/><path d="M30 6.5 V15 H38.5" style="fill:var(--f-sky,#cfe6fb)"/>
+      <path d="M14.5 21 L18 34 L22 25 L26 34 L29.5 21" stroke-width="3" style="stroke:#6f9fd9"/><path d="M15 38 h16" stroke-width="2"/></g></symbol>
+    <symbol id="i-excel" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6.5" y="9" width="35" height="30" rx="3" style="fill:#fff"/>
+      <path d="M6.5 12.5 Q6.5 9 10 9 H38 Q41.5 9 41.5 12.5 V19 H6.5 Z" style="fill:var(--f-mint,#bfead6)"/>
+      <path d="M6.5 29 H41.5 M18.5 9 V39 M30 9 V39"/><path d="M21 33 l3 -3 l3 3" stroke-width="2" style="stroke:#5aa883"/></g></symbol>
+    <symbol id="i-music" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 34 V12 L36 8 V30"/><ellipse cx="13.5" cy="34.5" rx="5.5" ry="4.2" style="fill:var(--f-rose,#ffd3de)"/><ellipse cx="31.5" cy="30.5" rx="5.5" ry="4.2" style="fill:var(--f-rose,#ffd3de)"/>
+      <path d="M18 18 L36 14" stroke-width="4"/></g></symbol>
+    <symbol id="i-key" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="17" r="9" style="fill:var(--f-sun,#fff0b3)"/><circle cx="16" cy="17" r="3" style="fill:#fff"/>
+      <path d="M22.5 23.5 L41 42 M33 33 l5.5 -5.5 M38 38 l4.5 -4.5"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="24" cy="24" r="17" style="fill:var(--f-mint,#bfead6)"/><path d="M15 25 L22 32 L34 16" stroke-width="4"/></g></symbol>
+    <symbol id="i-rose" viewBox="56 40 88 116"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M100 152 C100 122 98 102 100 80" stroke="#5aa883" stroke-width="5"/>
+      <path d="M100 122 C80 114 70 120 66 130 C82 136 94 132 100 122z" fill="#bfead6" stroke="#5aa883" stroke-width="3"/>
+      <path d="M100 108 C120 100 132 106 136 116 C120 122 106 118 100 108z" fill="#bfead6" stroke="#5aa883" stroke-width="3"/>
+      <path d="M100 80 C82 80 76 60 90 52 C96 48 104 48 110 52 C124 60 118 80 100 80z" fill="#ffd3de" stroke="#e56b8c" stroke-width="4"/>
+      <path d="M100 72 C92 70 90 60 98 56 C102 54 106 56 108 60" stroke="#e56b8c" stroke-width="3.4"/><path d="M88 66 C90 60 96 58 100 60" stroke="#e56b8c" stroke-width="3.4"/></g></symbol>
+    <symbol id="i-arrow" viewBox="0 0 80 60"><g fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 8 C26 4 56 14 62 44"/><path d="M52 36 L62 46 L68 32"/></g></symbol>
   </defs>
 </svg>
 
@@ -32,55 +72,91 @@
   <svg class="d d6" viewBox="0 0 100 100"><path d="M50 10l9 27 28 1-22 17 8 28-23-16-23 16 8-28-22-17 28-1z" fill="#e6dcfa" stroke="#9a82d6" stroke-width="3" stroke-linejoin="round"/></svg>
 </div>
 
+
 <header class="top">
-  <div class="brand"><span class="brand-rose">🌹</span><span class="brand-name" data-i18n="app.title">Õpetaja Abiline</span></div>
+  <div class="brand"><svg class="brand-rose" aria-hidden="true"><use href="#i-rose"/></svg><span class="brand-name" data-i18n="app.title">Õpetaja Abiline</span></div>
   <div class="top-actions">
     <div class="lang-switch" id="uiLang" role="group" aria-label="Language">
       <button data-lang="et" class="active">EE</button>
       <button data-lang="ru">RU</button>
       <button data-lang="en">EN</button>
     </div>
-    <button id="btnMusic" class="icon-btn" data-i18n-title="music.toggle" aria-label="Music">🎵</button>
-    <button id="btnTutorial" class="icon-btn" data-i18n-title="tut.open" aria-label="Tutorial">❓</button>
-    <button id="btnSettings" class="icon-btn" data-i18n-title="set.open" aria-label="Settings">⚙️</button>
+    <button id="btnMusic" class="icon-btn" data-i18n-title="music.toggle" aria-label="Music"><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg></button>
   </div>
 </header>
 
+<nav class="tabs" id="tabs" aria-label="Menu">
+  <button class="tab active" id="navHome" data-go="home"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg><span data-i18n="nav.home"></span></button>
+  <button class="tab" id="navMake" data-go="make"><svg class="ico" aria-hidden="true"><use href="#i-wand"/></svg><span data-i18n="nav.make"></span></button>
+  <button class="tab off" id="navResult" data-go="result"><svg class="ico" aria-hidden="true"><use href="#i-doc"/></svg><span data-i18n="nav.result"></span></button>
+  <button class="tab" id="navSettings" data-go="settings"><svg class="ico" aria-hidden="true"><use href="#i-gear"/></svg><span data-i18n="nav.settings"></span></button>
+  <button class="tab" id="navHelp" data-go="help"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg><span data-i18n="nav.help"></span></button>
+</nav>
+
 <main>
 
-  <!-- ============ HOME ============ -->
-  <section id="home" class="view">
-    <div class="hello card tilt-l">
+  <!-- ============ HOME / WELCOME ============ -->
+  <section id="sec-home" class="sec">
+    <div class="hero card tilt-l">
+      <span class="tape"></span>
+      <svg class="hero-art" aria-hidden="true"><use href="#i-rose"/></svg>
       <h1 id="greeting" class="hl">Tere!</h1>
-      <p id="greetingSub" class="lead" data-i18n="greet.sub"></p>
-      <p id="keyHint" class="notice hidden"></p>
+      <p class="lead" data-i18n="welcome.sub"></p>
+      <label class="field"><span data-i18n="welcome.name"></span>
+        <input id="homeName" type="text" maxlength="40" autocomplete="given-name" data-i18n-ph="welcome.namePh">
+      </label>
+      <div class="lang-switch big" id="homeLang" role="group" aria-label="Language">
+        <button data-lang="et">Eesti</button>
+        <button data-lang="ru">Русский</button>
+        <button data-lang="en">English</button>
+      </div>
+      <p id="keyStatus" class="key-badge"></p>
+      <div class="hero-actions">
+        <button class="btn big primary" data-go="make" data-i18n="home.go"></button>
+        <span class="tour-wrap">
+          <button id="btnTour" class="btn" data-i18n="home.tour"></button>
+          <span id="startHere" class="start-here"><svg class="ico-arrow" aria-hidden="true"><use href="#i-arrow"/></svg><b data-i18n="home.first"></b></span>
+        </span>
+        <button id="btnHomeDemo" class="btn ghost" data-i18n="btn.demo"></button>
+      </div>
+      <p class="fine" data-i18n="welcome.privacy"></p>
     </div>
+
+    <h2 class="sec-title" data-i18n="home.steps"></h2>
+    <div class="steps3">
+      <button class="card mini-card tilt-l" data-go="settings"><span class="mc-ico c-sun"><svg class="ico" aria-hidden="true"><use href="#i-key"/></svg></span><span class="mc-num">1</span><b data-i18n="home.s1.t"></b><span data-i18n="home.s1.d"></span></button>
+      <button class="card mini-card tilt-r" data-go="make"><span class="mc-ico c-rose"><svg class="ico" aria-hidden="true"><use href="#i-wand"/></svg></span><span class="mc-num">2</span><b data-i18n="home.s2.t"></b><span data-i18n="home.s2.d"></span></button>
+      <button class="card mini-card tilt-l" data-go="make"><span class="mc-ico c-mint"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span><span class="mc-num">3</span><b data-i18n="home.s3.t"></b><span data-i18n="home.s3.d"></span></button>
+    </div>
+  </section>
+
+  <!-- ============ MAKE ============ -->
+  <section id="sec-make" class="sec hidden">
+    <h1 class="hl page-title" data-i18n="greet.sub"></h1>
+    <p id="keyHint" class="notice hidden"></p>
 
     <!-- step 1 -->
     <div class="step">
       <h2><span class="num">1</span><span data-i18n="step.format"></span></h2>
       <div class="format-grid" id="formatGrid">
         <button class="fmt card selectable active" data-fmt="pptx">
-          <span class="fmt-ico c-rose">📊</span>
+          <span class="fmt-ico c-rose"><svg class="ico"><use href="#i-slides"/></svg></span>
           <span class="fmt-name">PowerPoint</span>
           <span class="fmt-ext">.pptx</span>
           <span class="fmt-desc" data-i18n="fmt.pptx.desc"></span>
-          <span class="fmt-ai">✨ Gemini / ChatGPT / Claude</span>
-        </button>
+                  </button>
         <button class="fmt card selectable" data-fmt="docx">
-          <span class="fmt-ico c-sky">📝</span>
+          <span class="fmt-ico c-sky"><svg class="ico"><use href="#i-word"/></svg></span>
           <span class="fmt-name">Word</span>
           <span class="fmt-ext">.docx</span>
           <span class="fmt-desc" data-i18n="fmt.docx.desc"></span>
-          <span class="fmt-ai">✨ Gemini / ChatGPT / Claude</span>
-        </button>
+                  </button>
         <button class="fmt card selectable" data-fmt="xlsx">
-          <span class="fmt-ico c-mint">📈</span>
+          <span class="fmt-ico c-mint"><svg class="ico"><use href="#i-excel"/></svg></span>
           <span class="fmt-name">Excel</span>
           <span class="fmt-ext">.xlsx</span>
           <span class="fmt-desc" data-i18n="fmt.xlsx.desc"></span>
-          <span class="fmt-ai">✨ Gemini / ChatGPT / Claude</span>
-        </button>
+                  </button>
       </div>
       <div id="providerRow" class="provider-row">
         <span class="lbl" data-i18n="f.provider"></span>
@@ -164,10 +240,10 @@
   </section>
 
   <!-- ============ RESULT ============ -->
-  <section id="result" class="view hidden">
+  <section id="sec-result" class="sec hidden">
     <div class="result-bar card tilt-r">
       <div class="rb-left">
-        <button id="btnBack" class="btn ghost small" data-i18n="btn.back"></button>
+        <button id="btnBack" class="btn ghost small" data-go="make" data-i18n="btn.back"></button>
         <div>
           <div id="resTitle" class="res-title"></div>
           <div id="resMeta" class="soft"></div>
@@ -185,33 +261,77 @@
     <div id="preview" class="preview"></div>
   </section>
 
+
+  <!-- ============ SETTINGS ============ -->
+  <section id="sec-settings" class="sec hidden">
+    <h1 class="hl page-title" data-i18n="set.title"></h1>
+    <p class="soft" data-i18n="set.page.sub"></p>
+
+    <div class="card set-card tilt-l">
+      <h2 class="set-h" data-i18n="set.you"></h2>
+      <div class="grid2">
+        <label class="field"><span data-i18n="set.name"></span><input id="setName" type="text" maxlength="40"></label>
+        <label class="field"><span data-i18n="set.uilang"></span>
+          <select id="setLang"><option value="et">Eesti</option><option value="ru">Русский</option><option value="en">English</option></select>
+        </label>
+      </div>
+    </div>
+
+    <div class="card set-card tilt-r">
+      <h2 class="set-h" data-i18n="set.sec.ai"></h2>
+      <p class="soft" data-i18n="set.keys.sub"></p>
+      <div id="keyGroups"></div>
+      <label class="check"><input id="setRemember" type="checkbox"><span data-i18n="set.remember"></span></label>
+      <p class="fine warn" data-i18n="set.remember.warn"></p>
+      <button id="btnForget" class="btn small danger" data-i18n="set.forget"></button>
+    </div>
+
+    <div class="card set-card tilt-l">
+      <h2 class="set-h" data-i18n="set.music"></h2>
+      <div class="grid2">
+        <label class="field"><span data-i18n="set.track"></span><select id="setTrack"></select></label>
+        <label class="field"><span data-i18n="set.volume"></span><input id="setVol" type="range" min="0" max="100"></label>
+      </div>
+      <label class="check"><input id="setMusicLoad" type="checkbox"><span data-i18n="set.music.load"></span></label>
+      <label class="check"><input id="setMusicKeep" type="checkbox"><span data-i18n="set.music.keep"></span></label>
+      <div class="own-music">
+        <label class="btn small" for="setOwn" data-i18n="set.own"></label>
+        <input id="setOwn" type="file" accept="audio/*" class="visually-hidden">
+        <span id="ownName" class="soft"></span>
+      </div>
+      <p class="fine" data-i18n="set.own.hint"></p>
+    </div>
+
+    <details class="card set-card adv tilt-r">
+      <summary class="set-h" data-i18n="set.models"></summary>
+      <p class="soft" data-i18n="set.models.sub"></p>
+      <div class="grid3">
+        <label class="field"><span>Claude</span><input id="modelClaude" type="text"></label>
+        <label class="field"><span>ChatGPT</span><input id="modelOpenai" type="text"></label>
+        <label class="field"><span>Gemini</span><input id="modelGemini" type="text"></label>
+      </div>
+      <button id="btnModelsReset" class="btn small ghost" data-i18n="set.models.reset"></button>
+    </details>
+
+    <div class="make-row"><button id="btnSettingsSave" class="btn big primary" data-i18n="btn.save"></button></div>
+  </section>
+
+  <!-- ============ HELP ============ -->
+  <section id="sec-help" class="sec hidden">
+    <h1 class="hl page-title" data-i18n="help.title"></h1>
+    <div class="card tour-card tilt-r">
+      <button id="btnHelpTour" class="btn big primary" data-i18n="help.tour"></button>
+      <p class="soft" data-i18n="help.tour.sub"></p>
+    </div>
+    <h2 class="sec-title" data-i18n="help.written"></h2>
+    <div id="helpSteps" class="help-steps"></div>
+  </section>
+
 </main>
 
 <footer class="foot">
   <span data-i18n="foot.made"></span> 🌹💖
 </footer>
-
-<!-- ============ WELCOME ============ -->
-<div id="welcome" class="overlay hidden">
-  <div class="card welcome-card tilt-l">
-    <div class="big-rose">🌹</div>
-    <h1 class="hl" data-i18n="welcome.title"></h1>
-    <p class="lead" data-i18n="welcome.sub"></p>
-    <div class="lang-switch big" id="welcomeLang" role="group" aria-label="Language">
-      <button data-lang="et">Eesti</button>
-      <button data-lang="ru">Русский</button>
-      <button data-lang="en">English</button>
-    </div>
-    <label class="field"><span data-i18n="welcome.name"></span>
-      <input id="welcomeName" type="text" maxlength="40" autocomplete="given-name" data-i18n-ph="welcome.namePh">
-    </label>
-    <div class="welcome-actions">
-      <button id="welcomeStart" class="btn big primary" data-i18n="welcome.start"></button>
-      <button id="welcomeSkip" class="btn ghost" data-i18n="welcome.skip"></button>
-    </div>
-    <p class="fine" data-i18n="welcome.privacy"></p>
-  </div>
-</div>
 
 <!-- ============ LOADING ============ -->
 <div id="loading" class="overlay loading hidden" role="status" aria-live="polite">
@@ -246,88 +366,6 @@
   </div>
 </div>
 
-<!-- ============ SETTINGS ============ -->
-<div id="settings" class="modal hidden" role="dialog" aria-modal="true">
-  <div class="card modal-card tilt-l">
-    <div class="modal-head">
-      <h2 class="hl" data-i18n="set.title"></h2>
-      <button class="icon-btn close" data-close aria-label="Close">✕</button>
-    </div>
-
-    <div class="modal-body">
-      <section class="set-sec">
-        <h3 data-i18n="set.you"></h3>
-        <div class="grid2">
-          <label class="field"><span data-i18n="set.name"></span><input id="setName" type="text" maxlength="40"></label>
-          <label class="field"><span data-i18n="set.uilang"></span>
-            <select id="setLang"><option value="et">Eesti</option><option value="ru">Русский</option><option value="en">English</option></select>
-          </label>
-        </div>
-      </section>
-
-      <section class="set-sec">
-        <h3 data-i18n="set.keys"></h3>
-        <p class="soft" data-i18n="set.keys.sub"></p>
-        <div id="keyGroups"></div>
-        <label class="check"><input id="setRemember" type="checkbox"><span data-i18n="set.remember"></span></label>
-        <p class="fine warn" data-i18n="set.remember.warn"></p>
-        <button id="btnForget" class="btn small danger" data-i18n="set.forget"></button>
-      </section>
-
-      <section class="set-sec">
-        <h3 data-i18n="set.music"></h3>
-        <div class="grid2">
-          <label class="field"><span data-i18n="set.track"></span><select id="setTrack"></select></label>
-          <label class="field"><span data-i18n="set.volume"></span><input id="setVol" type="range" min="0" max="100"></label>
-        </div>
-        <label class="check"><input id="setMusicLoad" type="checkbox"><span data-i18n="set.music.load"></span></label>
-        <label class="check"><input id="setMusicKeep" type="checkbox"><span data-i18n="set.music.keep"></span></label>
-        <div class="own-music">
-          <label class="btn small" for="setOwn" data-i18n="set.own"></label>
-          <input id="setOwn" type="file" accept="audio/*" class="visually-hidden">
-          <span id="ownName" class="soft"></span>
-        </div>
-        <p class="fine" data-i18n="set.own.hint"></p>
-      </section>
-
-      <details class="set-sec adv">
-        <summary data-i18n="set.models"></summary>
-        <p class="soft" data-i18n="set.models.sub"></p>
-        <div class="grid3">
-          <label class="field"><span>Claude</span><input id="modelClaude" type="text"></label>
-          <label class="field"><span>ChatGPT</span><input id="modelOpenai" type="text"></label>
-          <label class="field"><span>Gemini</span><input id="modelGemini" type="text"></label>
-        </div>
-        <button id="btnModelsReset" class="btn small ghost" data-i18n="set.models.reset"></button>
-      </details>
-    </div>
-
-    <div class="modal-foot">
-      <button id="btnSettingsTutorial" class="btn ghost" data-i18n="tut.open"></button>
-      <button id="btnSettingsSave" class="btn primary" data-i18n="btn.save"></button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ TUTORIAL ============ -->
-<div id="tutorial" class="modal hidden" role="dialog" aria-modal="true">
-  <div class="card modal-card tut-card tilt-r">
-    <div class="modal-head">
-      <h2 class="hl" id="tutTitle"></h2>
-      <button class="icon-btn close" data-close aria-label="Close">✕</button>
-    </div>
-    <div class="tut-dots" id="tutDots"></div>
-    <div class="modal-body" id="tutBody"></div>
-    <div class="modal-foot">
-      <button id="tutSkip" class="btn ghost" data-i18n="tut.skip"></button>
-      <div class="tut-nav">
-        <button id="tutPrev" class="btn" data-i18n="tut.prev"></button>
-        <button id="tutNext" class="btn primary" data-i18n="tut.next"></button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- ============ PRESENTER ============ -->
 <div id="presenter" class="overlay presenter hidden">
   <button id="presClose" class="icon-btn close" aria-label="Close">✕</button>
@@ -337,17 +375,31 @@
   <div id="presCount" class="pres-count"></div>
 </div>
 
+<!-- ============ ARROW TOUR ============ -->
+<div id="tour" class="tour hidden" aria-live="polite">
+  <div id="tourCatch" class="tour-catch"></div>
+  <div id="tourHole" class="tour-hole"></div>
+  <svg id="tourSvg" class="tour-svg" aria-hidden="true"></svg>
+  <div id="tourBubble" class="tour-bubble" role="dialog" aria-label="Tour">
+    <div id="tourStep" class="tour-step"></div>
+    <p id="tourText" class="tour-text"></p>
+    <div class="tour-nav">
+      <button id="tourSkip" class="btn ghost small" data-i18n="tut.skip"></button>
+      <span class="tour-nav-r"><button id="tourPrev" class="btn small" data-i18n="tut.prev"></button><button id="tourNext" class="btn small primary" data-i18n="tut.next"></button></span>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast hidden" role="status"></div>
 
-<script src="vendor/pptxgen.bundle.js"></script>
-<script src="vendor/docx.iife.js"></script>
-<script src="vendor/exceljs.min.js"></script>
 <script src="js/i18n.js"></script>
+<script src="js/i18n-ui.js"></script>
 <script src="js/music.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/build.js"></script>
 <script src="js/preview.js"></script>
 <script src="js/demo.js"></script>
+<script src="js/tour.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

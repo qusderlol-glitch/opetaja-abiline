@@ -77,6 +77,23 @@
     if (!$$('.modal:not(.hidden), .overlay:not(.hidden)').length) document.body.classList.remove('noscroll');
   }
   function providerOf() { return S.prov; }   // one AI for every format
+
+  /* ------------------------------------------------------------------ pages (the menu) */
+  var SECS = ['home', 'make', 'result', 'settings', 'help'], curSec = 'home';
+  function go(sec) {
+    if (SECS.indexOf(sec) < 0) sec = 'home';
+    if (sec === 'result' && !RESULT) sec = 'make';
+    curSec = sec;
+    SECS.forEach(function (x) { $('#sec-' + x).classList.toggle('hidden', x !== sec); });
+    $$('.tab').forEach(function (b) { b.classList.toggle('active', b.dataset.go === sec); });
+    $('#navResult').classList.toggle('off', !RESULT);
+    document.body.dataset.sec = sec;
+    if (sec === 'settings') buildSettings();
+    if (sec === 'help') renderHelp();
+    if (sec === 'home') renderKeyStatus();
+    if (location.hash !== '#' + sec) { try { location.hash = sec; } catch (e) { /* ignore */ } }
+    window.scrollTo(0, 0);
+  }
   function aiName(p) { return AI.META[p].name; }
 
   /* ------------------------------------------------------------------ rendering of the home screen */
@@ -111,7 +128,7 @@
     updateFormatUI();
     $$('#diffSeg button').forEach(function (b) { b.classList.toggle('active', b.dataset.diff === S.diff); });
     $$('#providerSeg button').forEach(function (b) { b.classList.toggle('active', b.dataset.prov === S.prov); });
-    $$('#uiLang button, #welcomeLang button').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === S.ui); });
+    $$('#uiLang button, #homeLang button').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === S.ui); });
   }
 
   function renderTopicChips() {
@@ -141,7 +158,15 @@
     renderProvNote(); updateKeyHint();
   }
 
+  function renderKeyStatus() {
+    var el = $('#keyStatus'); if (!el) return;
+    var ok = activeKeys(S.prov).length > 0;
+    el.className = 'key-badge' + (ok ? ' ok' : '');
+    el.textContent = ok ? t('home.key.ok', { ai: aiName(S.prov) }) : t('home.key.none');
+  }
+
   function updateKeyHint() {
+    renderKeyStatus();
     var p = providerOf(S.fmt), el = $('#keyHint');
     if (activeKeys(p).length) { hide(el); return; }
     el.innerHTML = esc(t('hint.nokey', { ai: aiName(p) })) + ' <button class="linkbtn" data-act="openSettings">⚙️ ' + esc(t('set.open')) + '</button>';
@@ -151,9 +176,9 @@
   function applyLanguage() {
     I18N.setLang(S.ui);
     I18N.applyStatic();
-    renderGreeting(); renderForm(); renderMusicUI();
-    if (!$('#settings').classList.contains('hidden')) buildSettings();
-    if (!$('#tutorial').classList.contains('hidden')) renderTutorial();
+    renderGreeting(); renderForm(); renderMusicUI(); renderKeyStatus();
+    if (curSec === 'settings') buildSettings();
+    if (curSec === 'help') renderHelp();
     if (RESULT) renderResultHead();
   }
 
@@ -225,8 +250,8 @@
     }
   }
 
-  function saveFromSettings() {
-    S.name = $('#setName').value.trim().slice(0, 40);
+  function collectSettings() {
+    S.name = $('#setName').value.trim().slice(0, 40); $('#homeName').value = S.name;
     var newLang = $('#setLang').value;
     S.remember = $('#setRemember').checked;
     S.music.load = $('#setMusicLoad').checked; S.music.keep = $('#setMusicKeep').checked;
@@ -235,27 +260,23 @@
     S.models.gemini = $('#modelGemini').value.trim() || AI.DEFAULT_MODELS.gemini;
     $$('.key-in').forEach(function (inp) { KEYS[inp.dataset.prov][+inp.dataset.idx] = cleanKey(inp.value); });
     saveKeys();
-    if (newLang !== S.ui) setUiLang(newLang); else { saveSettings(); applyLanguage(); }
-    closeModal('settings');
-    toast(t('set.saved'));
+    if (newLang !== S.ui) setUiLang(newLang); else { saveSettings(); renderGreeting(); updateKeyHint(); }
   }
+  function saveFromSettings() { collectSettings(); toast(t('set.saved')); }
 
-  /* ------------------------------------------------------------------ tutorial */
-  var tutIdx = 0;
-  function renderTutorial() {
+  /* ------------------------------------------------------------------ help page and the arrow tour */
+  function renderHelp() {
     var steps = I18N.TUT[S.ui] || I18N.TUT.et;
-    tutIdx = Math.max(0, Math.min(steps.length - 1, tutIdx));
-    var st = steps[tutIdx];
-    $('#tutTitle').textContent = st.ico + '  ' + st.title;
-    var link = st.link ? '<p class="tut-link"><a class="btn primary" href="' + I18N.KEY_LINKS[st.link] + '" target="_blank" rel="noopener noreferrer">' + esc(t('set.getkey')) + '</a></p>' : '';
-    $('#tutBody').innerHTML = '<div class="tut-step">' + st.html + link + '</div>';
-    $('#tutDots').innerHTML = steps.map(function (_, i) { return '<button class="dot' + (i === tutIdx ? ' active' : '') + '" data-step="' + i + '" aria-label="' + (i + 1) + '"></button>'; }).join('');
-    $('#tutPrev').style.visibility = tutIdx === 0 ? 'hidden' : 'visible';
-    $('#tutNext').textContent = tutIdx === steps.length - 1 ? t('tut.done') : t('tut.next');
-    $('#tutBody').scrollTop = 0;
+    $('#helpSteps').innerHTML = steps.map(function (st, i) {
+      var link = st.link ? '<p class="tut-link"><a class="btn primary" href="' + I18N.KEY_LINKS[st.link] + '" target="_blank" rel="noopener noreferrer">' + esc(t('set.getkey')) + '</a></p>' : '';
+      return '<div class="card help-step ' + (i % 2 ? 'tilt-r' : 'tilt-l') + '"><span class="num">' + (i + 1) + '</span><h3>' + esc(st.title) + '</h3>' + st.html + link + '</div>';
+    }).join('');
   }
-  function openTutorial(start) { tutIdx = start || 0; renderTutorial(); openModal('tutorial'); }
-  function closeTutorial() { closeModal('tutorial'); if (!S.tutorialSeen) { S.tutorialSeen = true; saveSettings(); } }
+  function startTour() {
+    if (!S.tutorialSeen) { S.tutorialSeen = true; saveSettings(); }
+    $('#startHere').classList.add('hidden');
+    Tour.start(I18N.TOUR[S.ui] || I18N.TOUR.et, { go: go });
+  }
 
   /* ------------------------------------------------------------------ music UI */
   function renderMusicUI() {
@@ -266,7 +287,7 @@
     var id = Music.trackId;
     $('#loadTrack').textContent = on ? t('music.now', { name: t('music.names.' + id) }) : t('music.off');
     $('#lmVol').value = Math.round(Music.volume * 100);
-    if (!$('#settings').classList.contains('hidden')) buildTrackSelect();
+    if (curSec === 'settings') buildTrackSelect();
   }
 
   function persistMusic() {
@@ -327,7 +348,7 @@
     div.addEventListener('click', function (ev) {
       var a = ev.target.closest('[data-act]'); if (!a) return;
       div.remove(); if (!$$('.modal:not(.hidden), .overlay:not(.hidden)').length) document.body.classList.remove('noscroll');
-      if (a.dataset.act === 'errSettings') { buildSettings(); openModal('settings'); }
+      if (a.dataset.act === 'errSettings') go('settings');
     });
   }
 
@@ -356,7 +377,7 @@
     opts = opts || readForm();
     if (!opts.topic) { toast(t('err.topic')); $('#fTopic').focus(); showHome(); return; }
     var provider = providerOf(opts.fmt), keys = activeKeys(provider);
-    if (!keys.length) { toast(t('err.nokey', { ai: aiName(provider) })); buildSettings(); openModal('settings'); return; }
+    if (!keys.length) { toast(t('err.nokey', { ai: aiName(provider) })); go('settings'); return; }
     LAST_OPTS = opts;
     ABORT = new AbortController();
     startLoading('load.title');
@@ -382,7 +403,7 @@
   async function regenSlide(i) {
     if (RESULT.demo) { toast(t('res.demoNote')); return; }
     var prov = providerOf(), keys = activeKeys(prov);
-    if (!keys.length) { toast(t('err.nokey', { ai: aiName(prov) })); buildSettings(); openModal('settings'); return; }
+    if (!keys.length) { toast(t('err.nokey', { ai: aiName(prov) })); go('settings'); return; }
     ABORT = new AbortController();
     startLoading('load.title.slide');
     try {
@@ -397,7 +418,7 @@
   }
 
   /* ------------------------------------------------------------------ result screen */
-  function showHome() { hide($('#result')); show($('#home')); window.scrollTo(0, 0); }
+  function showHome() { go('make'); }
 
   function renderResultHead() {
     var r = RESULT;
@@ -417,8 +438,7 @@
     renderResultHead();
     $('#preview').className = 'preview kind-' + RESULT.kind;
     renderPreview(false);
-    hide($('#home')); show($('#result'));
-    window.scrollTo(0, 0);
+    go('result');
   }
 
   /* ------------------------------------------------------------------ downloads */
@@ -476,6 +496,8 @@
 
       var lang = el.closest('[data-lang]');
       if (lang) { setUiLang(lang.dataset.lang); return; }
+      var gob = el.closest('[data-go]');
+      if (gob) { go(gob.dataset.go); return; }
 
       var fmt = el.closest('.fmt');
       if (fmt) {
@@ -497,14 +519,11 @@
       if (sw) { S.theme = sw.dataset.theme; saveSettings(); $$('#themeSwatches .swatch').forEach(function (b) { b.classList.toggle('active', b === sw); }); return; }
       var tp = el.closest('[data-topic]');
       if (tp) { $('#fTopic').value = tp.dataset.topic; $('#fTopic').focus(); return; }
-      var stp = el.closest('[data-step]');
-      if (stp) { tutIdx = +stp.dataset.step; renderTutorial(); return; }
-      if (el.closest('[data-close]')) { var m = el.closest('.modal'); if (m.id === 'tutorial') closeTutorial(); else closeModal(m.id); return; }
 
       var act = el.closest('[data-act]');
       if (act) {
         var a = act.dataset.act;
-        if (a === 'openSettings') { buildSettings(); openModal('settings'); }
+        if (a === 'openSettings') go('settings');
         else if (a === 'eye') {
           var inp = act.parentNode.querySelector('.key-in'); var vis = inp.type === 'text';
           inp.type = vis ? 'password' : 'text'; act.textContent = t(vis ? 'btn.show' : 'btn.hide');
@@ -523,12 +542,14 @@
       }
     });
 
-    /* header */
-    $('#btnSettings').addEventListener('click', function () { buildSettings(); openModal('settings'); });
-    $('#btnTutorial').addEventListener('click', function () { openTutorial(0); });
-    $('#btnSettingsTutorial').addEventListener('click', function () { closeModal('settings'); openTutorial(0); });
+    /* header, home and help */
     $('#btnSettingsSave').addEventListener('click', saveFromSettings);
+    $('#sec-settings').addEventListener('change', collectSettings);
     $('#btnMusic').addEventListener('click', function () { Music.toggle(); });
+    $('#btnTour').addEventListener('click', startTour);
+    $('#btnHelpTour').addEventListener('click', startTour);
+    $('#btnHomeDemo').addEventListener('click', onDemo);
+    $('#homeName').addEventListener('input', function () { S.name = $('#homeName').value.trim().slice(0, 40); saveSettings(); renderGreeting(); });
 
     /* forget keys */
     $('#btnForget').addEventListener('click', function () {
@@ -552,25 +573,11 @@
     $('#lmVol').addEventListener('input', function () { Music.setVolume(+$('#lmVol').value / 100); persistMusic(); });
     Music.onChange(renderMusicUI);
 
-    /* tutorial nav */
-    $('#tutPrev').addEventListener('click', function () { tutIdx--; renderTutorial(); });
-    $('#tutNext').addEventListener('click', function () {
-      var steps = I18N.TUT[S.ui] || I18N.TUT.et;
-      if (tutIdx >= steps.length - 1) closeTutorial(); else { tutIdx++; renderTutorial(); }
-    });
-    $('#tutSkip').addEventListener('click', closeTutorial);
-
-    /* welcome */
-    $('#welcomeStart').addEventListener('click', function () { finishWelcome(true); });
-    $('#welcomeSkip').addEventListener('click', function () { finishWelcome(false); });
-    $('#welcomeName').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') finishWelcome(true); });
-
     /* main buttons */
     $('#btnMake').addEventListener('click', function () { rememberForm(); onMake(); });
     $('#fTopic').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { rememberForm(); onMake(); } });
     $('#btnDemo').addEventListener('click', onDemo);
     $('#loadCancel').addEventListener('click', function () { if (ABORT) ABORT.abort(); });
-    $('#btnBack').addEventListener('click', showHome);
     $('#btnDownload').addEventListener('click', onDownload);
     $('#btnHtml').addEventListener('click', onHtml);
     $('#btnPrint').addEventListener('click', onPrint);
@@ -615,21 +622,8 @@
         else if (ev.key === 'Escape') closePresenter();
         return;
       }
-      if (ev.key === 'Escape') {
-        if (!$('#tutorial').classList.contains('hidden')) closeTutorial();
-        else if (!$('#settings').classList.contains('hidden')) closeModal('settings');
-      }
     });
     document.addEventListener('fullscreenchange', function () { if (!document.fullscreenElement && !$('#presenter').classList.contains('hidden')) closePresenter(); });
-  }
-
-  function finishWelcome(withTutorial) {
-    S.name = $('#welcomeName').value.trim().slice(0, 40);
-    S.welcomed = true; saveSettings();
-    hide($('#welcome')); document.body.classList.remove('noscroll');
-    renderGreeting();
-    if (withTutorial && !S.tutorialSeen) openTutorial(0);
-    else if (!withTutorial) { S.tutorialSeen = true; saveSettings(); }
   }
 
   /* ------------------------------------------------------------------ start */
@@ -644,7 +638,12 @@
     renderGreeting(); renderForm(); renderMusicUI();
     $('#fGrade').value = S.grade; $('#fSubject').value = S.subject; renderTopicChips();
     bind();
-    if (!S.welcomed) { $('#welcomeName').value = S.name; show($('#welcome')); document.body.classList.add('noscroll'); }
+    $('#homeName').value = S.name;
+    if (S.tutorialSeen) $('#startHere').classList.add('hidden');
+    Tour.init();
+    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (h !== curSec && SECS.indexOf(h) >= 0) go(h); });
+    var h0 = location.hash.replace('#', '');
+    go(SECS.indexOf(h0) >= 0 && h0 !== 'result' ? h0 : 'home');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

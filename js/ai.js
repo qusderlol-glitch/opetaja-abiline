@@ -46,7 +46,7 @@
     return data;
   }
 
-  async function request(provider, key, model, system, user, signal, maxTokens) {
+  async function requestOnce(provider, key, model, system, user, signal, maxTokens) {
     var data, out;
     if (provider === 'claude') {
       data = await doFetch('https://api.anthropic.com/v1/messages', {
@@ -69,8 +69,50 @@
       });
       out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
     } else {
-      var callGemini = function (m) {
-        return doFetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(m) + ':generateContent', {
+      out = await geminiRequest(key, model, system, user, signal, maxTokens);
+    }
+    if (!out) throw AIError('parse', 0, 'empty answer');
+    return out;
+  }
+
+  /* ---------------- Gemini: many models, one key ----------------
+     Google renames and overloads models often. If one model is busy / missing / out of quota,
+     try Google's alias and then whatever Google's own model list offers, and remember what worked. */
+  var FALLBACK_KINDS = { model: 1, busy: 1, quota: 1 };
+  var PRIORITY = { quota: 3, busy: 2, model: 1 };
+
+  function sleep(ms, signal) {
+    return new Promise(function (res, rej) {
+      var t = setTimeout(res, ms);
+      if (signal) signal.addEventListener('abort', function () { clearTimeout(t); rej(new DOMException('Aborted', 'AbortError')); }, { once: true });
+    });
+  }
+  function readGood() { try { return JSON.parse(localStorage.getItem('oa.goodModel') || '{}'); } catch (e) { return {}; } }
+  function saveGood(cfg, m) { try { localStorage.setItem('oa.goodModel', JSON.stringify({ cfg: cfg, model: m })); } catch (e) { /* private mode */ } }
+
+  function modelScore(n) {
+    var v = (n.match(/(\d+(?:\.\d+)?)/) || [0, '0'])[1];
+    return parseFloat(v) * 10 - (/lite/.test(n) ? 1 : 0) - (/latest/.test(n) ? 0.5 : 0);
+  }
+  async function listGeminiModels(key, signal) {
+    var data = await doFetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', { signal: signal, headers: { 'x-goog-api-key': key } });
+    return (data.models || []).filter(function (m) {
+      return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0 && /flash/.test(m.name) &&
+        !/image|tts|live|audio|embed|robot|computer|vision|preview|exp|learnlm|gemma|8b/.test(m.name);
+    }).map(function (m) { return m.name.replace(/^models\//, ''); })
+      .sort(function (a, b) { return modelScore(b) - modelScore(a); });
+  }
+
+  async function geminiRequest(key, model, system, user, signal, maxTokens) {
+    var good = readGood(), queue = [], tried = {}, n = 0, listed = false, best = null;
+    if (good.model && good.cfg === model) queue.push(good.model);
+    queue.push(model, 'gemini-flash-latest');
+    while (queue.length && n < 7) {
+      var m = queue.shift();
+      if (tried[m]) continue;
+      tried[m] = 1; n++;
+      try {
+        var data = await doFetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(m) + ':generateContent', {
           method: 'POST', signal: signal,
           headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
           body: JSON.stringify({
@@ -79,18 +121,33 @@
             generationConfig: { responseMimeType: 'application/json', maxOutputTokens: maxTokens || 16000 }
           })
         });
-      };
-      try { data = await callGemini(model); }
-      catch (ge) {
-        // if the model name is unknown, fall back to Google's always-current alias
-        if (ge && ge.kind === 'model' && model !== 'gemini-flash-latest') data = await callGemini('gemini-flash-latest');
-        else throw ge;
+        saveGood(model, m);
+        var parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+        return (parts || []).map(function (p) { return p.text || ''; }).join('');
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw e;
+        if (!e || !FALLBACK_KINDS[e.kind]) throw e;
+        e.detail = (m + ': ' + (e.detail || '')).slice(0, 300);
+        if (!best || PRIORITY[e.kind] > PRIORITY[best.kind]) best = e;
+        if (e.kind === 'busy') await sleep(1000, signal);
+        if (!queue.length && !listed) {
+          listed = true;
+          try { queue = await listGeminiModels(key, signal); } catch (le) { if (le && le.name === 'AbortError') throw le; }
+        }
       }
-      var parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
-      out = (parts || []).map(function (p) { return p.text || ''; }).join('');
     }
-    if (!out) throw AIError('parse', 0, 'empty answer');
-    return out;
+    throw best || AIError('generic');
+  }
+
+  /* ChatGPT / Claude: a short pause and one or two more tries when the service says "busy" */
+  async function request(provider, key, model, system, user, signal, maxTokens) {
+    for (var i = 0; ; i++) {
+      try { return await requestOnce(provider, key, model, system, user, signal, maxTokens); }
+      catch (e) {
+        if (provider === 'gemini' || !e || e.kind !== 'busy' || i >= 2) throw e;
+        await sleep(2000 * (i + 1), signal);
+      }
+    }
   }
 
   function parseJson(text) {
