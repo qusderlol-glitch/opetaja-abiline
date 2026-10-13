@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="et">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Õpetaja Abiline 🌹</title>
+<meta name="description" content="Õpetaja Abiline · Помощник учителя · Teacher's Helper – PowerPoint, Word, Excel">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B9%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- wobbly pencil-line filter -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- background doodles -->
+<div class="doodles" aria-hidden="true">
+  <svg class="d d1" viewBox="0 0 100 100"><g fill="none" stroke="#e56b8c" stroke-width="3" stroke-linecap="round"><circle cx="50" cy="50" r="9" fill="#ffd3de"/><path d="M50 41c-8-14 6-24 12-12 10-4 18 10 4 14M59 52c14 2 18 18 4 20-4 12-20 6-14-8M50 59c0 14-16 18-20 6-12-2-12-18 2-18M41 50c-14-4-12-20 2-20 2-12 18-8 14 6"/></g></svg>
+  <svg class="d d2" viewBox="0 0 100 100"><path d="M50 82C16 56 14 30 32 24c10-3 18 3 18 12 0-9 8-15 18-12 18 6 16 32-18 58z" fill="#ffd3de" stroke="#e56b8c" stroke-width="3" stroke-linejoin="round"/></svg>
+  <svg class="d d3" viewBox="0 0 100 100"><path d="M50 10l9 27 28 1-22 17 8 28-23-16-23 16 8-28-22-17 28-1z" fill="#fff0b3" stroke="#e0a526" stroke-width="3" stroke-linejoin="round"/></svg>
+  <svg class="d d4" viewBox="0 0 100 100"><path d="M10 60c10-30 20 30 30 0s20 30 30 0 15 20 20 10" fill="none" stroke="#7ec4a4" stroke-width="4" stroke-linecap="round"/></svg>
+  <svg class="d d5" viewBox="0 0 100 100"><g fill="none" stroke="#8aa9e0" stroke-width="3" stroke-linecap="round"><path d="M20 80l40-40 12 12-40 40-16 4z" fill="#dbe8ff"/><path d="M60 40l8-8 12 12-8 8"/></g></svg>
+  <svg class="d d6" viewBox="0 0 100 100"><path d="M50 10l9 27 28 1-22 17 8 28-23-16-23 16 8-28-22-17 28-1z" fill="#e6dcfa" stroke="#9a82d6" stroke-width="3" stroke-linejoin="round"/></svg>
+</div>
+
+<header class="top">
+  <div class="brand"><span class="brand-rose">🌹</span><span class="brand-name" data-i18n="app.title">Õpetaja Abiline</span></div>
+  <div class="top-actions">
+    <div class="lang-switch" id="uiLang" role="group" aria-label="Language">
+      <button data-lang="et" class="active">EE</button>
+      <button data-lang="ru">RU</button>
+      <button data-lang="en">EN</button>
+    </div>
+    <button id="btnMusic" class="icon-btn" data-i18n-title="music.toggle" aria-label="Music">🎵</button>
+    <button id="btnTutorial" class="icon-btn" data-i18n-title="tut.open" aria-label="Tutorial">❓</button>
+    <button id="btnSettings" class="icon-btn" data-i18n-title="set.open" aria-label="Settings">⚙️</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HOME ============ -->
+  <section id="home" class="view">
+    <div class="hello card tilt-l">
+      <h1 id="greeting" class="hl">Tere!</h1>
+      <p id="greetingSub" class="lead" data-i18n="greet.sub"></p>
+      <p id="keyHint" class="notice hidden"></p>
+    </div>
+
+    <!-- step 1 -->
+    <div class="step">
+      <h2><span class="num">1</span><span data-i18n="step.format"></span></h2>
+      <div class="format-grid" id="formatGrid">
+        <button class="fmt card selectable active" data-fmt="pptx">
+          <span class="fmt-ico c-rose">📊</span>
+          <span class="fmt-name">PowerPoint</span>
+          <span class="fmt-ext">.pptx</span>
+          <span class="fmt-desc" data-i18n="fmt.pptx.desc"></span>
+          <span class="fmt-ai">✨ Claude</span>
+        </button>
+        <button class="fmt card selectable" data-fmt="docx">
+          <span class="fmt-ico c-sky">📝</span>
+          <span class="fmt-name">Word</span>
+          <span class="fmt-ext">.docx</span>
+          <span class="fmt-desc" data-i18n="fmt.docx.desc"></span>
+          <span class="fmt-ai">✨ ChatGPT / Gemini</span>
+        </button>
+        <button class="fmt card selectable" data-fmt="xlsx">
+          <span class="fmt-ico c-mint">📈</span>
+          <span class="fmt-name">Excel</span>
+          <span class="fmt-ext">.xlsx</span>
+          <span class="fmt-desc" data-i18n="fmt.xlsx.desc"></span>
+          <span class="fmt-ai">✨ ChatGPT / Gemini</span>
+        </button>
+      </div>
+      <div id="providerRow" class="provider-row hidden">
+        <span class="lbl" data-i18n="f.provider"></span>
+        <div class="seg" id="providerSeg">
+          <button data-prov="openai">ChatGPT</button>
+          <button data-prov="gemini">Gemini</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- step 2 -->
+    <div class="step">
+      <h2><span class="num">2</span><span data-i18n="step.type"></span></h2>
+      <div class="chips" id="typeChips"></div>
+      <p id="typeDesc" class="soft"></p>
+    </div>
+
+    <!-- step 3 -->
+    <div class="step">
+      <h2><span class="num">3</span><span data-i18n="step.details"></span></h2>
+      <div class="card form-card">
+        <div class="grid2">
+          <label class="field"><span data-i18n="f.grade"></span>
+            <select id="fGrade"></select>
+          </label>
+          <label class="field"><span data-i18n="f.subject"></span>
+            <select id="fSubject"></select>
+          </label>
+        </div>
+
+        <label class="field"><span data-i18n="f.topic"></span>
+          <input id="fTopic" type="text" maxlength="200" autocomplete="off" data-i18n-ph="f.topicPh">
+        </label>
+        <div class="chips small" id="topicChips"></div>
+
+        <label class="field"><span data-i18n="f.extra"></span>
+          <textarea id="fExtra" rows="2" maxlength="800" data-i18n-ph="f.extraPh"></textarea>
+        </label>
+
+        <div class="grid3">
+          <div class="field"><span data-i18n="f.difficulty"></span>
+            <div class="seg" id="diffSeg">
+              <button data-diff="easy" data-i18n="diff.easy"></button>
+              <button data-diff="medium" data-i18n="diff.medium" class="active"></button>
+              <button data-diff="hard" data-i18n="diff.hard"></button>
+            </div>
+          </div>
+          <label class="field"><span id="countLabel" data-i18n="f.count.slides"></span>
+            <input id="fCount" type="number" min="3" max="30" value="10">
+          </label>
+          <label class="field"><span data-i18n="f.outLang"></span>
+            <select id="fOutLang">
+              <option value="et">Eesti keel</option>
+              <option value="ru">Русский</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="themeRow" class="field"><span data-i18n="f.theme"></span>
+          <div class="themes" id="themeSwatches"></div>
+        </div>
+
+        <div class="grid2">
+          <label class="field"><span data-i18n="f.school"></span>
+            <input id="fSchool" type="text" maxlength="80" data-i18n-ph="f.schoolPh">
+          </label>
+          <label class="check"><input id="fAnswers" type="checkbox" checked><span data-i18n="f.answers"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="make-row">
+      <button id="btnMake" class="btn big primary"><span data-i18n="btn.make"></span> ✨</button>
+      <button id="btnDemo" class="btn ghost" data-i18n="btn.demo"></button>
+    </div>
+    <p class="fine" data-i18n="fine.ai"></p>
+    <p class="fine" data-i18n="fine.privacy"></p>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section id="result" class="view hidden">
+    <div class="result-bar card tilt-r">
+      <div class="rb-left">
+        <button id="btnBack" class="btn ghost small" data-i18n="btn.back"></button>
+        <div>
+          <div id="resTitle" class="res-title"></div>
+          <div id="resMeta" class="soft"></div>
+        </div>
+      </div>
+      <div class="rb-actions">
+        <button id="btnDownload" class="btn primary"><span id="dlLabel"></span></button>
+        <button id="btnPresent" class="btn hidden" data-i18n="btn.present"></button>
+        <button id="btnHtml" class="btn" data-i18n="btn.html"></button>
+        <button id="btnPrint" class="btn" data-i18n="btn.print"></button>
+        <button id="btnAgain" class="btn" data-i18n="btn.again"></button>
+      </div>
+    </div>
+    <p class="notice" data-i18n="res.hint"></p>
+    <div id="preview" class="preview"></div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span data-i18n="foot.made"></span> 🌹💖
+</footer>
+
+<!-- ============ WELCOME ============ -->
+<div id="welcome" class="overlay hidden">
+  <div class="card welcome-card tilt-l">
+    <div class="big-rose">🌹</div>
+    <h1 class="hl" data-i18n="welcome.title"></h1>
+    <p class="lead" data-i18n="welcome.sub"></p>
+    <div class="lang-switch big" id="welcomeLang" role="group" aria-label="Language">
+      <button data-lang="et">Eesti</button>
+      <button data-lang="ru">Русский</button>
+      <button data-lang="en">English</button>
+    </div>
+    <label class="field"><span data-i18n="welcome.name"></span>
+      <input id="welcomeName" type="text" maxlength="40" autocomplete="given-name" data-i18n-ph="welcome.namePh">
+    </label>
+    <div class="welcome-actions">
+      <button id="welcomeStart" class="btn big primary" data-i18n="welcome.start"></button>
+      <button id="welcomeSkip" class="btn ghost" data-i18n="welcome.skip"></button>
+    </div>
+    <p class="fine" data-i18n="welcome.privacy"></p>
+  </div>
+</div>
+
+<!-- ============ LOADING ============ -->
+<div id="loading" class="overlay loading hidden" role="status" aria-live="polite">
+  <div class="card loading-card tilt-r">
+    <svg class="load-art" viewBox="0 0 200 160" aria-hidden="true">
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path class="stem" d="M100 150 C100 120 98 100 100 78" stroke="#5aa883" stroke-width="5"/>
+        <path class="leaf l1" d="M100 120 C80 112 70 118 66 128 C82 134 94 130 100 120z" fill="#bfead6" stroke="#5aa883" stroke-width="3"/>
+        <path class="leaf l2" d="M100 106 C120 98 132 104 136 114 C120 120 106 116 100 106z" fill="#bfead6" stroke="#5aa883" stroke-width="3"/>
+        <g class="bloom" stroke="#e56b8c" stroke-width="4">
+          <path d="M100 78 C82 78 76 58 90 50 C96 46 104 46 110 50 C124 58 118 78 100 78z" fill="#ffd3de"/>
+          <path d="M100 70 C92 68 90 58 98 54 C102 52 106 54 108 58"/>
+          <path d="M88 64 C90 58 96 56 100 58"/>
+        </g>
+        <path class="spark s1" d="M40 40l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#fff0b3" stroke="#e0a526" stroke-width="2"/>
+        <path class="spark s2" d="M160 56l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#e6dcfa" stroke="#9a82d6" stroke-width="2"/>
+        <path class="spark s3" d="M150 120l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#cfe6fb" stroke="#6f9fd9" stroke-width="2"/>
+      </g>
+    </svg>
+    <h2 id="loadTitle" class="hl" data-i18n="load.title"></h2>
+    <p id="loadMsg" class="lead"></p>
+    <div class="bar"><div id="loadBar" class="bar-fill"></div></div>
+    <div class="load-music">
+      <span id="loadTrack" class="soft"></span>
+      <div class="lm-btns">
+        <button id="lmPlay" class="icon-btn" data-i18n-title="music.playpause">▶</button>
+        <button id="lmSkip" class="icon-btn" data-i18n-title="music.skip">⏭</button>
+        <input id="lmVol" type="range" min="0" max="100" value="50" data-i18n-title="music.volume" aria-label="Volume">
+      </div>
+    </div>
+    <button id="loadCancel" class="btn ghost small" data-i18n="btn.cancel"></button>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div id="settings" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="card modal-card tilt-l">
+    <div class="modal-head">
+      <h2 class="hl" data-i18n="set.title"></h2>
+      <button class="icon-btn close" data-close aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <section class="set-sec">
+        <h3 data-i18n="set.you"></h3>
+        <div class="grid2">
+          <label class="field"><span data-i18n="set.name"></span><input id="setName" type="text" maxlength="40"></label>
+          <label class="field"><span data-i18n="set.uilang"></span>
+            <select id="setLang"><option value="et">Eesti</option><option value="ru">Русский</option><option value="en">English</option></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="set-sec">
+        <h3 data-i18n="set.keys"></h3>
+        <p class="soft" data-i18n="set.keys.sub"></p>
+        <div id="keyGroups"></div>
+        <label class="check"><input id="setRemember" type="checkbox"><span data-i18n="set.remember"></span></label>
+        <p class="fine warn" data-i18n="set.remember.warn"></p>
+        <button id="btnForget" class="btn small danger" data-i18n="set.forget"></button>
+      </section>
+
+      <section class="set-sec">
+        <h3 data-i18n="set.music"></h3>
+        <div class="grid2">
+          <label class="field"><span data-i18n="set.track"></span><select id="setTrack"></select></label>
+          <label class="field"><span data-i18n="set.volume"></span><input id="setVol" type="range" min="0" max="100"></label>
+        </div>
+        <label class="check"><input id="setMusicLoad" type="checkbox"><span data-i18n="set.music.load"></span></label>
+        <label class="check"><input id="setMusicKeep" type="checkbox"><span data-i18n="set.music.keep"></span></label>
+        <div class="own-music">
+          <label class="btn small" for="setOwn" data-i18n="set.own"></label>
+          <input id="setOwn" type="file" accept="audio/*" class="visually-hidden">
+          <span id="ownName" class="soft"></span>
+        </div>
+        <p class="fine" data-i18n="set.own.hint"></p>
+      </section>
+
+      <details class="set-sec adv">
+        <summary data-i18n="set.models"></summary>
+        <p class="soft" data-i18n="set.models.sub"></p>
+        <div class="grid3">
+          <label class="field"><span>Claude</span><input id="modelClaude" type="text"></label>
+          <label class="field"><span>ChatGPT</span><input id="modelOpenai" type="text"></label>
+          <label class="field"><span>Gemini</span><input id="modelGemini" type="text"></label>
+        </div>
+        <button id="btnModelsReset" class="btn small ghost" data-i18n="set.models.reset"></button>
+      </details>
+    </div>
+
+    <div class="modal-foot">
+      <button id="btnSettingsTutorial" class="btn ghost" data-i18n="tut.open"></button>
+      <button id="btnSettingsSave" class="btn primary" data-i18n="btn.save"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TUTORIAL ============ -->
+<div id="tutorial" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="card modal-card tut-card tilt-r">
+    <div class="modal-head">
+      <h2 class="hl" id="tutTitle"></h2>
+      <button class="icon-btn close" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="tut-dots" id="tutDots"></div>
+    <div class="modal-body" id="tutBody"></div>
+    <div class="modal-foot">
+      <button id="tutSkip" class="btn ghost" data-i18n="tut.skip"></button>
+      <div class="tut-nav">
+        <button id="tutPrev" class="btn" data-i18n="tut.prev"></button>
+        <button id="tutNext" class="btn primary" data-i18n="tut.next"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PRESENTER ============ -->
+<div id="presenter" class="overlay presenter hidden">
+  <button id="presClose" class="icon-btn close" aria-label="Close">✕</button>
+  <button id="presPrev" class="icon-btn nav prev" aria-label="Previous">◀</button>
+  <div id="presStage" class="pres-stage"></div>
+  <button id="presNext" class="icon-btn nav next" aria-label="Next">▶</button>
+  <div id="presCount" class="pres-count"></div>
+</div>
+
+<div id="toast" class="toast hidden" role="status"></div>
+
+<script src="vendor/pptxgen.bundle.js"></script>
+<script src="vendor/docx.iife.js"></script>
+<script src="vendor/exceljs.min.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/music.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/build.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/demo.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
