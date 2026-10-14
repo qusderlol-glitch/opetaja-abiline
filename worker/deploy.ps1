@@ -1,7 +1,7 @@
 # Õpetaja Abiline – one-click Cloudflare deploy of the "site key" Worker (Windows PowerShell).
 # Run from the repo folder:  powershell -ExecutionPolicy Bypass -File worker\deploy.ps1
 # You will: (1) log in to Cloudflare in the browser, (2) paste your Gemini key (it is hidden and goes only to Cloudflare).
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'   # wrangler writes progress to stderr; that is not an error
 Set-Location -Path $PSScriptRoot
 
 function Step($n, $text) { Write-Host ""; Write-Host "[$n] $text" -ForegroundColor Magenta }
@@ -17,9 +17,11 @@ if ($LASTEXITCODE -ne 0) { Write-Host 'Login failed.' -ForegroundColor Red; exit
 
 Step 3 'Creating the storage for the daily limits (KV "RATE")'
 $kvId = $null
-$out = (& npx.cmd --yes wrangler@4 kv namespace create RATE 2>&1 | Out-String)
+$tomlPath = Join-Path $PSScriptRoot 'wrangler.toml'
+if (Test-Path $tomlPath) { $old = Get-Content $tomlPath -Raw; if ($old -match 'id\s*=\s*"([0-9a-f]{32})"') { $kvId = $Matches[1]; Write-Host "Using the storage that already exists: $kvId" } }
+if (-not $kvId) { $out = (& npx.cmd --yes wrangler@4 kv namespace create RATE 2>&1 | Out-String)
 Write-Host $out
-if ($out -match '"?id"?\s*[=:]\s*"([0-9a-f]{32})"') { $kvId = $Matches[1] }
+if ($out -match '"?id"?\s*[=:]\s*"([0-9a-f]{32})"') { $kvId = $Matches[1] } }
 if (-not $kvId) {
   Write-Host 'Looking for an existing namespace...'
   $list = (& npx.cmd --yes wrangler@4 kv namespace list 2>$null | Out-String)
@@ -49,12 +51,14 @@ id = "$kvId"
 "@
 Set-Content -Path (Join-Path $PSScriptRoot 'wrangler.toml') -Value $toml -Encoding UTF8
 
-Step 5 'Deploying the Worker (if asked to pick a workers.dev name - choose any, e.g. your name)'
+Step 5 'Deploying the Worker (if asked to pick a workers.dev name - type any, e.g. your name, and press Enter; answer Y if asked to register)'
+& npx.cmd --yes wrangler@4 deploy
+Write-Host 'Reading the address...'
 $dep = (& npx.cmd --yes wrangler@4 deploy 2>&1 | Out-String)
-Write-Host $dep
 $url = $null
 if ($dep -match 'https://[a-z0-9\-\.]+\.workers\.dev') { $url = $Matches[0] }
-if (-not $url) { Write-Host 'Deploy did not print an address. Send the text above to Claude.' -ForegroundColor Red; exit 1 }
+if (-not $url) { Write-Host $dep; Write-Host 'Deploy did not print an address. Send the text above to Claude.' -ForegroundColor Red; exit 1 }
+Write-Host "Worker: $url"
 
 Step 6 'Secret Gemini key (get one free at https://aistudio.google.com/apikey)'
 $sec = Read-Host 'Paste your Gemini key here and press Enter (nothing will be shown)' -AsSecureString
