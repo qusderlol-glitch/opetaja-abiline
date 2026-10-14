@@ -2,7 +2,14 @@
 <html lang="et">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffd3de">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Abiline">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Õpetaja Abiline 🌹</title>
 <meta name="description" content="Õpetaja Abiline · Помощник учителя · Teacher's Helper – PowerPoint, Word, Excel">
@@ -323,6 +330,7 @@
       <button id="btnHelpTour" class="btn big primary" data-i18n="help.tour"></button>
       <p class="soft" data-i18n="help.tour.sub"></p>
     </div>
+    <div id="installCard" class="card install-card tilt-l"></div>
     <h2 class="sec-title" data-i18n="help.written"></h2>
     <div id="helpSteps" class="help-steps"></div>
   </section>
@@ -391,10 +399,16 @@
   </div>
 </div>
 
+<div id="saveSheet" class="save-sheet hidden" role="dialog" aria-live="polite">
+  <div class="ss-name" id="ssName"></div>
+  <div class="ss-row"><button id="ssBtn" class="btn primary" data-i18n="save.btn"></button><button id="ssClose" class="btn" data-i18n="save.close"></button></div>
+</div>
+
 <div id="toast" class="toast hidden" role="status"></div>
 
 <script src="js/i18n.js"></script>
 <script src="js/i18n-ui.js"></script>
+<script src="js/i18n-more.js"></script>
 <script src="js/music.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/build.js"></script>

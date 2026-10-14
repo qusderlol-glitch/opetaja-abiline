@@ -30,6 +30,7 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
+  padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
   margin: 0; min-height: 100vh; color: var(--ink); font: 400 17px/1.55 var(--body);
   background-color: var(--paper);
   background-image: linear-gradient(rgba(229, 107, 140, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 107, 140, .07) 1px, transparent 1px);
@@ -325,3 +326,16 @@ input[type=range] { width: 100%; accent-color: var(--rose); padding: 0; }
   main { padding: 0; max-width: none; }
   .preview .slide, .preview .paper { box-shadow: none; }
 }
+
+/* ---------- phone install card + save sheet ---------- */
+.install-card h2 { margin: 0 0 4px; font: 400 30px/1.1 var(--head); }
+.install-card h3 { margin: 6px 0; font: 800 17px var(--body); }
+.inst-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 8px; }
+.inst-col ol { margin: 0; padding-left: 22px; } .inst-col li { margin: 4px 0; }
+.inst-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.small { font-size: 14px; }
+@media (max-width: 760px) { .inst-cols { grid-template-columns: 1fr; } }
+.save-sheet { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 90; width: min(94vw, 440px); background: #fff; border: 2.5px solid var(--ink); border-radius: var(--wob1); padding: 14px 16px; box-shadow: 4px 6px 0 rgba(90, 59, 75, .25); text-align: center; }
+.ss-name { font: 800 15px var(--body); margin-bottom: 10px; word-break: break-all; }
+.ss-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+@supports (padding: max(0px)) { .tabs { padding-top: max(10px, env(safe-area-inset-top)); } }

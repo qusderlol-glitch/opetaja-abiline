@@ -89,7 +89,7 @@
     $('#navResult').classList.toggle('off', !RESULT);
     document.body.dataset.sec = sec;
     if (sec === 'settings') buildSettings();
-    if (sec === 'help') renderHelp();
+    if (sec === 'help') { renderHelp(); renderInstall(); }
     if (sec === 'home') renderKeyStatus();
     if (location.hash !== '#' + sec) { try { location.hash = sec; } catch (e) { /* ignore */ } }
     window.scrollTo(0, 0);
@@ -178,7 +178,7 @@
     I18N.applyStatic();
     renderGreeting(); renderForm(); renderMusicUI(); renderKeyStatus();
     if (curSec === 'settings') buildSettings();
-    if (curSec === 'help') renderHelp();
+    if (curSec === 'help') { renderHelp(); renderInstall(); }
     if (RESULT) renderResultHead();
   }
 
@@ -287,6 +287,26 @@
       var link = st.link ? '<p class="tut-link"><a class="btn primary" href="' + I18N.KEY_LINKS[st.link] + '" target="_blank" rel="noopener noreferrer">' + esc(t('set.getkey')) + '</a></p>' : '';
       return '<div class="card help-step ' + (i % 2 ? 'tilt-r' : 'tilt-l') + '"><span class="num">' + (i + 1) + '</span><h3>' + esc(st.title) + '</h3>' + st.html + link + '</div>';
     }).join('');
+  }
+  var deferredInstall = null;
+  var APK_URL = 'https://github.com/qusderlol-glitch/opetaja-abiline/releases/latest/download/opetaja-abiline.apk';
+  function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+  function renderInstall() {
+    var el = $('#installCard'); if (!el) return;
+    if (window.OAAndroid || isStandalone()) { el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+    var li = function (k) { return '<li>' + esc(t(k)) + '</li>'; };
+    el.innerHTML = '<h2 class="card-title">' + esc(t('inst.title')) + '</h2><p class="soft">' + esc(t('inst.sub')) + '</p>' +
+      '<div class="inst-cols"><div class="inst-col"><h3>🍎 ' + esc(t('inst.ios.t')) + '</h3><ol>' + li('inst.ios.1') + li('inst.ios.2') + li('inst.ios.3') + li('inst.ios.4') + '</ol></div>' +
+      '<div class="inst-col"><h3>🤖 ' + esc(t('inst.and.t')) + '</h3><ol>' + li('inst.and.1') + li('inst.and.2') + '</ol>' +
+      '<p><a class="btn" href="' + APK_URL + '" target="_blank" rel="noopener noreferrer">' + esc(t('inst.apk')) + '</a></p><p class="soft small">' + esc(t('inst.apk.note')) + '</p></div></div>' +
+      '<div class="inst-actions">' + (deferredInstall ? '<button class="btn primary" data-act="install">' + esc(t('inst.btn')) + '</button>' : '') +
+      '<button class="btn" data-act="sharesite">' + esc(t('inst.share')) + '</button></div>';
+  }
+  async function shareSite() {
+    var data = { title: t('app.title'), url: location.origin + location.pathname };
+    try { if (navigator.share) { await navigator.share(data); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(data.url); toast(t('inst.copied')); } catch (e) { window.prompt('', data.url); }
   }
   function startTour() {
     if (!S.tutorialSeen) { S.tutorialSeen = true; saveSettings(); }
@@ -461,18 +481,61 @@
   }
 
   /* ------------------------------------------------------------------ downloads */
-  function saveBlob(blob, name) {
+  var IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var pendingFile = null;
+
+  function anchorSave(blob, name) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 6000);
+  }
+
+  function blobToBase64(blob) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { res(String(fr.result).split(',')[1] || ''); };
+      fr.onerror = function () { rej(fr.error); };
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  function canShareFile(file) {
+    try { return !!(navigator.canShare && navigator.share && navigator.canShare({ files: [file] })); } catch (e) { return false; }
+  }
+
+  function closeSaveSheet() { pendingFile = null; hide($('#saveSheet')); }
+
+  function offerSaveSheet(file) {
+    pendingFile = file; $('#ssName').textContent = t('save.ready') + ': ' + file.name; show($('#saveSheet'));
+  }
+
+  async function shareNow(file) {
+    try { await navigator.share({ files: [file], title: file.name }); closeSaveSheet(); toast(t('toast.saved')); }
+    catch (e) { if (e && e.name !== 'AbortError') { anchorSave(file, file.name); closeSaveSheet(); } }
+  }
+
+  /* Android app: the page is inside a WebView where blob downloads do not work, so the app saves it */
+  /* iPhone / iPad: the Share sheet gives "Save to Files"; the first try may be refused (needs a fresh tap) */
+  async function saveBlob(blob, name) {
+    if (window.OAAndroid && window.OAAndroid.save) {
+      try { window.OAAndroid.save(name, blob.type || 'application/octet-stream', await blobToBase64(blob)); return; } catch (e) { console.error(e); }
+    }
+    if (IS_IOS) {
+      var file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
+      if (canShareFile(file)) {
+        try { await navigator.share({ files: [file], title: name }); toast(t('toast.saved')); return; }
+        catch (e) { if (e && e.name === 'AbortError') return; offerSaveSheet(file); return; }
+      }
+    }
+    anchorSave(blob, name);
   }
 
   async function onDownload() {
     try {
       var r = Preview.clean(RESULT);
       var out = await Build.make(r);
-      saveBlob(new Blob([out.data], { type: out.mime }), Build.fileBase(r) + '.' + out.ext);
-      toast(t('toast.downloaded'));
+      await saveBlob(new Blob([out.data], { type: out.mime }), Build.fileBase(r) + '.' + out.ext);
+      if (!(IS_IOS || window.OAAndroid)) toast(t('toast.downloaded'));
     } catch (e) { console.error(e); toast(t('err.file')); }
   }
 
@@ -549,6 +612,8 @@
         }
         else if (a === 'testkey') testKey(act.dataset.prov, +act.dataset.idx);
         else if (a === 'findmodel') findModel();
+        else if (a === 'install') { if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; renderInstall(); } }
+        else if (a === 'sharesite') shareSite();
         else if (a === 'addb') {
           var i = +act.dataset.i; RESULT.slides[i].bullets.push('…'); renderPreview(true);
           var spans = $$('.ed[data-path^="slides.' + i + '.bullets."]'); var last = spans[spans.length - 1];
@@ -661,6 +726,10 @@
     $('#homeName').value = S.name;
     if (S.tutorialSeen) $('#startHere').classList.add('hidden');
     Tour.init();
+    $('#ssBtn').addEventListener('click', function () { if (pendingFile) shareNow(pendingFile); });
+    $('#ssClose').addEventListener('click', closeSaveSheet);
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; if (curSec === 'help') renderInstall(); });
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost') && !window.OAAndroid) navigator.serviceWorker.register('sw.js').catch(function () { /* offline mode is optional */ });
     window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (h !== curSec && SECS.indexOf(h) >= 0) go(h); });
     var h0 = location.hash.replace('#', '');
     go(SECS.indexOf(h0) >= 0 && h0 !== 'result' ? h0 : 'home');
