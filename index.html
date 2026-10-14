@@ -230,14 +230,21 @@
           </div>
         </details>
 
-        <div class="grid3">
-          <div class="field"><span data-i18n="f.difficulty"></span>
-            <div class="seg" id="diffSeg">
-              <button data-diff="easy" data-i18n="diff.easy"></button>
-              <button data-diff="medium" data-i18n="diff.medium" class="active"></button>
-              <button data-diff="hard" data-i18n="diff.hard"></button>
-            </div>
+        <div class="field level-field"><span data-i18n="f.difficulty"></span>
+          <div class="seg" id="diffSeg">
+            <button type="button" data-diff="easy" data-i18n="diff.easy"></button>
+            <button type="button" data-diff="medium" data-i18n="diff.medium"></button>
+            <button type="button" data-diff="hard" data-i18n="diff.hard"></button>
           </div>
+          <div class="level-row">
+            <input id="fLevel" type="range" min="1" max="10" step="1" value="5" aria-label="1-10">
+            <input id="fLevelNum" type="number" min="1" max="10" step="1" value="5" inputmode="numeric" aria-label="1-10">
+            <span class="level-scale">/ 10</span>
+          </div>
+          <div class="level-text" id="levelText"></div>
+        </div>
+
+        <div class="grid2">
           <label class="field"><span id="countLabel" data-i18n="f.count.slides"></span>
             <input id="fCount" type="number" min="3" max="30" value="10">
           </label>
@@ -256,6 +263,22 @@
           <label class="check" id="rowVariantB"><input id="fVariantB" type="checkbox"><span data-i18n="opt.variantB"></span></label>
         </div>
 
+        <details class="adv-box" id="advBox">
+          <summary><span class="adv-title" data-i18n="adv.title"></span> <i class="adv-count hidden" id="advCount"></i></summary>
+          <p class="fine" data-i18n="adv.sub"></p>
+          <div id="advBody"></div>
+          <div class="adv-foot">
+            <button type="button" class="mini" id="advReset" data-i18n="adv.reset"></button>
+            <span class="adv-presets">
+              <select id="advPresetSel"></select>
+              <button type="button" class="mini" id="advPresetLoad" data-i18n="adv.preset.load"></button>
+              <button type="button" class="mini danger" id="advPresetDel" data-i18n="adv.preset.del"></button>
+              <input id="advPresetName" type="text" maxlength="30" data-i18n-ph="adv.preset.name">
+              <button type="button" class="mini" id="advPresetSave" data-i18n="adv.preset.save"></button>
+            </span>
+          </div>
+        </details>
+
         <div id="themeRow" class="field"><span data-i18n="f.theme"></span>
           <div class="themes" id="themeSwatches"></div>
         </div>
@@ -269,6 +292,7 @@
       </div>
     </div>
 
+    <div id="sumLine" class="sum-line" aria-live="polite"></div>
     <div class="make-row">
       <button id="btnMake" class="btn big primary"><span data-i18n="btn.make"></span> ✨</button>
       <button id="btnDemo" class="btn ghost" data-i18n="btn.demo"></button>
@@ -347,6 +371,19 @@
       <label class="check"><input id="setRemember" type="checkbox"><span data-i18n="set.remember"></span></label>
       <p class="fine warn" data-i18n="set.remember.warn"></p>
       <button id="btnForget" class="btn small danger" data-i18n="set.forget"></button>
+    </div>
+
+    <div class="card set-card tilt-r transfer-card">
+      <h2 class="set-h" data-i18n="tr.title"></h2>
+      <p class="soft" data-i18n="tr.sub"></p>
+      <div class="tr-row">
+        <button id="btnTrCopy" class="btn small" data-i18n="tr.copy"></button>
+        <button id="btnTrShow" class="mini" data-i18n="tr.show"></button>
+      </div>
+      <textarea id="trOut" class="tr-box hidden" rows="3" readonly></textarea>
+      <p class="fine warn" data-i18n="tr.warn"></p>
+      <label class="field"><span data-i18n="tr.in"></span><textarea id="trIn" class="tr-box" rows="3" spellcheck="false" autocomplete="off" data-i18n-ph="tr.inph"></textarea></label>
+      <div class="tr-row"><button id="btnTrImport" class="btn small primary" data-i18n="tr.import"></button><span id="trMsg" class="fine"></span></div>
     </div>
 
     <div class="card set-card tilt-l">
@@ -469,6 +506,7 @@
 <script src="js/i18n-more.js"></script>
 <script src="js/music.js"></script>
 <script src="js/ai.js"></script>
+<script src="js/advanced.js"></script>
 <script src="js/build.js"></script>
 <script src="js/preview.js"></script>
 <script src="js/demo.js"></script>

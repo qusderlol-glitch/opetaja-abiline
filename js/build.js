@@ -148,11 +148,20 @@
   /* ================= Word ================= */
   async function buildDocx(r) {
     var D = root.docx, th = theme(r), L = labels(r);
-    var FONT = 'Calibri';
+    var look = r.look || {};
+    var FONT = look.font || 'Calibri';
+    var SC = (look.fsize || 12) / 12;                       // text size chosen by the teacher
+    var landscape = look.orient === 'landscape';
+    var sideM = look.margins === 'narrow' ? 700 : (look.margins === 'wide' ? 1800 : 1200), topM = look.margins === 'narrow' ? 700 : (look.margins === 'wide' ? 1400 : 1000);
+    var TEXTW = (landscape ? 16838 : 11906) - 2 * sideM;      // usable width in twips
     var total = totalPoints(r);
 
-    function run(text, o) { o = o || {}; o.text = text; o.font = FONT; return new D.TextRun(o); }
-    function para(children, o) { o = o || {}; o.children = children; return new D.Paragraph(o); }
+    function run(text, o) { o = o || {}; o.text = text; o.font = FONT; if (o.size) o.size = Math.max(14, Math.round(o.size * SC)); return new D.TextRun(o); }
+    function para(children, o) {
+      o = o || {}; o.children = children;
+      if (look.spacing) o.spacing = Object.assign({}, o.spacing, { line: Math.round(240 * look.spacing), lineRule: D.LineRuleType.AUTO });
+      return new D.Paragraph(o);
+    }
     var ink = '3B2E33', grey = '8A7A80';
 
     var kids = [];
@@ -172,7 +181,7 @@
         return Math.sqrt(tot / (tb.rows.length + 1) + 6);
       });
       var wsum = wts.reduce(function (a, b) { return a + b; }, 0);
-      var widths = wts.map(function (w) { return Math.max(900, Math.round(9500 * w / wsum)); });
+      var widths = wts.map(function (w) { return Math.max(900, Math.round((TEXTW - 100) * w / wsum)); });
       var big = r.wtype === 'cards', size = cols >= 5 ? 19 : (big ? 28 : 21);
       var mk = function (txt, head, first) {
         return new D.TableCell({
@@ -190,11 +199,11 @@
     kids.push(para([run(r.title, { bold: true, size: 40, color: th.d })], { alignment: D.AlignmentType.CENTER, spacing: { after: 60 } }));
     if (r.subtitle) kids.push(para([run(r.subtitle, { size: 24, color: th.p })], { alignment: D.AlignmentType.CENTER, spacing: { after: 160 } }));
     var us = function (n) { return new Array(n + 1).join('_'); };
-    if (!plain) kids.push(para([run(L.name + ': ' + us(26) + '    ' + L.cls + ': ' + us(8) + '    ' + L.date + ': ' + us(12), { size: 22, color: ink })], { spacing: { before: 120, after: 120 } }));
+    if (!plain && look.nameLine !== false) kids.push(para([run(L.name + ': ' + us(26) + '    ' + L.cls + ': ' + us(8) + '    ' + L.date + ': ' + us(12), { size: 22, color: ink })], { spacing: { before: 120, after: 120 } }));
     var meta = [];
     if (r.minutes) meta.push(L.time + ': ' + r.minutes + ' ' + L.minutes);
     if (total) meta.push(L.total + ': ' + total + ' ' + L.points);
-    if (meta.length && !plain) kids.push(para([run(meta.join('   ·   '), { size: 20, color: grey, italics: true })], { spacing: { after: 160 } }));
+    if (meta.length && !plain && look.showMeta !== false) kids.push(para([run(meta.join('   ·   '), { size: 20, color: grey, italics: true })], { spacing: { after: 160 } }));
     if (r.instructions && !plain) {
       kids.push(para([run(L.instructions + ': ', { bold: true, size: 22, color: th.d }), run(r.instructions, { size: 22, color: ink })], {
         shading: { type: D.ShadingType.CLEAR, fill: th.l, color: 'auto' },
@@ -216,8 +225,9 @@
       sec.tasks.forEach(function (t) {
         n++;
         var head = [run(n + '. ', { bold: true, size: 24, color: th.d }), run(t.text, { size: 24, color: ink })];
-        if (t.points) head.push(run('   (' + t.points + ' ' + L.points + ')', { size: 18, color: grey }));
+        if (t.points && look.showPts !== false) head.push(run('   (' + t.points + ' ' + L.points + ')', { size: 18, color: grey }));
         kids.push(para(head, { spacing: { before: 200, after: 80 }, indent: { left: 360, hanging: 360 }, keepNext: t.type !== 'fill' }));
+        if (t.hint) kids.push(para([run(L.hint + ': ' + t.hint, { size: 20, italics: true, color: grey })], { indent: { left: 360 }, spacing: { after: 60 } }));
         if (t.type === 'choice') {
           t.options.forEach(function (o, k) {
             kids.push(para([run(LETTERS[k] + ')  ' + o, { size: 23, color: ink })], { indent: { left: 720 }, spacing: { after: 40 } }));
@@ -229,7 +239,7 @@
             // a tab with an underscore leader draws a full line and never merges with its neighbours
             kids.push(new D.Paragraph({
               spacing: { before: 160, after: 0 }, indent: { left: 360 },
-              tabStops: [{ type: D.TabStopType.RIGHT, position: 9000, leader: D.LeaderType.UNDERSCORE }],
+              tabStops: [{ type: D.TabStopType.RIGHT, position: TEXTW - 500, leader: D.LeaderType.UNDERSCORE }],
               children: [new D.TextRun({ children: [new D.Tab()], font: FONT, size: 24, color: 'B8A9AF' })]
             }));
           }
@@ -272,9 +282,9 @@
 
     var doc = new D.Document({
       creator: '', title: r.title,
-      styles: { default: { document: { run: { font: FONT, size: 24 } } } },
+      styles: { default: { document: { run: { font: FONT, size: Math.round(24 * SC) } } } },
       sections: [{
-        properties: { page: { margin: { top: 1000, bottom: 1000, left: 1200, right: 1200 } } },
+        properties: { page: { size: landscape ? { orientation: D.PageOrientation.LANDSCAPE } : undefined, margin: { top: topM, bottom: topM, left: sideM, right: sideM } } },
         footers: {
           default: new D.Footer({
             children: [new D.Paragraph({

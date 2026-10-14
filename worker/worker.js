@@ -76,6 +76,7 @@ export default {
       return json({ error: { message: 'Request too large or empty' } }, 413, cors);
     }
     const maxTokens = Math.max(64, Math.min(16000, parseInt(body.maxTokens, 10) || 16000));
+    const temperature = (typeof body.temperature === 'number' && isFinite(body.temperature)) ? Math.max(0, Math.min(1.5, body.temperature)) : null;
 
     // ---- daily limits (KV is optional but strongly recommended) ----
     let kv = env.RATE, ipKey = null, totalKey = null, ipN = 0, totalN = 0;
@@ -91,7 +92,7 @@ export default {
     const geminiBody = {
       systemInstruction: { parts: [{ text: system }] },
       contents: [{ role: 'user', parts: [{ text: user }] }],
-      generationConfig: { responseMimeType: 'application/json', maxOutputTokens: maxTokens }
+      generationConfig: Object.assign({ responseMimeType: 'application/json', maxOutputTokens: maxTokens }, temperature !== null ? { temperature: temperature } : {})
     };
 
     const queue = [cfg(env, 'MODEL')].concat(FALLBACK_MODELS).filter(function (m, i, a) { return a.indexOf(m) === i; });

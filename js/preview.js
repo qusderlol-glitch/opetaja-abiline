@@ -77,14 +77,16 @@
   function docHtml(r, ctx) {
     var L = lab(r), tt = I18N.t, total = Build.totalPoints(r);
     var us = function (n) { return new Array(n + 1).join('_'); };
-    var h = ['<article class="paper" style="' + vars(r) + '">'];
+    var lk = r.look || {};
+    var pst = vars(r) + (lk.font ? 'font-family:\'' + lk.font + '\',Calibri,Arial,sans-serif;' : '') + (lk.fsize ? 'font-size:' + (16 * lk.fsize / 12).toFixed(1) + 'px;' : '') + (lk.spacing ? 'line-height:' + (lk.spacing * 1.25).toFixed(2) + ';' : '');
+    var h = ['<article class="paper' + (lk.orient === 'landscape' ? ' wide' : '') + '" style="' + e(pst) + '">'];
     h.push('<h2 class="p-title">' + ed(ctx, 'title', r.title) + '</h2>');
     if (r.subtitle) h.push('<p class="p-sub">' + ed(ctx, 'subtitle', r.subtitle) + '</p>');
-    if (!r.plain) h.push('<p class="p-name">' + e(L.name + ': ' + us(24) + '   ' + L.cls + ': ' + us(7) + '   ' + L.date + ': ' + us(11)) + '</p>');
+    if (!r.plain && lk.nameLine !== false) h.push('<p class="p-name">' + e(L.name + ': ' + us(24) + '   ' + L.cls + ': ' + us(7) + '   ' + L.date + ': ' + us(11)) + '</p>');
     var meta = [];
     if (r.minutes) meta.push(e(L.time + ': ' + r.minutes + ' ' + L.minutes));
     if (total) meta.push(e(L.total + ': ' + total + ' ' + L.points));
-    if (meta.length) h.push('<p class="p-meta">' + meta.join('  ·  ') + '</p>');
+    if (meta.length && lk.showMeta !== false) h.push('<p class="p-meta">' + meta.join('  ·  ') + '</p>');
     if (r.instructions && !r.plain) h.push('<div class="p-instr"><b>' + e(L.instructions) + ':</b> ' + ed(ctx, 'instructions', r.instructions) + '</div>');
     var n = 0;
     r.sections.forEach(function (sec, si) {
@@ -99,10 +101,11 @@
       sec.tasks.forEach(function (t, ti) {
         n++;
         var base = 'sections.' + si + '.tasks.' + ti;
-        var x = '<div class="task"><div class="t-head"><b>' + n + '.</b> ' + ed(ctx, base + '.text', t.text) + (t.points ? ' <small class="pts">(' + t.points + ' ' + e(L.points) + ')</small>' : '') + '</div>';
+        var x = '<div class="task"><div class="t-head"><b>' + n + '.</b> ' + ed(ctx, base + '.text', t.text) + (t.points && lk.showPts !== false ? ' <small class="pts">(' + t.points + ' ' + e(L.points) + ')</small>' : '') + '</div>';
         if (t.type === 'choice') x += '<div class="opts">' + t.options.map(function (o, k) { return '<div>' + LETTERS[k] + ') ' + ed(ctx, base + '.options.' + k, o) + '</div>'; }).join('') + '</div>';
         else if (t.type === 'truefalse') x += '<div class="opts">☐ ' + e(L.trueFalse[0]) + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;☐ ' + e(L.trueFalse[1]) + '</div>';
         else if (t.type === 'open') { x += '<div class="lines">'; for (var i = 0; i < (t.lines || 3); i++) x += '<div class="line"></div>'; x += '</div>'; }
+        if (t.hint) x += '<div class="t-hint">' + e(L.hint) + ': ' + ed(ctx, base + '.hint', t.hint) + '</div>';
         h.push(x + '</div>');
       });
     });
@@ -227,7 +230,7 @@
     '.p-text{font-style:italic;margin:6px 0 12px;white-space:pre-wrap}.p-text.plain{font-style:normal}',
     '.p-tbl-wrap{overflow-x:auto;margin:8px 0 14px}.p-tbl{border-collapse:collapse;width:100%;font-size:14px}.p-tbl th{background:var(--l);color:var(--d);padding:7px 9px;border:1.5px solid #5a3b4b}.p-tbl td{border:1.5px solid #5a3b4b;padding:7px 9px;vertical-align:middle}.p-tbl td.first{font-weight:800;background:#fbf7f4}.p-tbl.cards td{font-size:17px;padding:16px 11px}.p-tbl.cards td.first{font-weight:400;background:#fff}',
     '.task{margin:14px 0}.t-head{display:block}.t-head b{color:var(--d)}',
-    '.pts{color:#8a7a80;font-size:12px}.opts{margin:4px 0 0 34px;line-height:1.7}',
+    '.t-hint{margin:2px 0 0 34px;font-style:italic;color:#8a7a80;font-size:.88em}.paper.wide{max-width:1100px}.pts{color:#8a7a80;font-size:12px}.opts{margin:4px 0 0 34px;line-height:1.7}',
     '.lines{margin:6px 0 0 22px}.line{height:30px;border-bottom:1.5px solid #c9bcc2}',
     '.p-scale{margin:28px 0 8px;color:var(--d);font-size:17px}.scale{border-collapse:collapse;min-width:260px}.scale th,.scale td{border:1.5px solid #5a3b4b;padding:5px 16px;text-align:center}.scale th{background:var(--l);color:var(--d)}',
     '.p-key{margin-top:34px;padding-top:6px;border-top:3px dashed var(--p)}.k{margin:4px 0}.k b{color:var(--d)}',

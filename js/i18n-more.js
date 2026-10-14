@@ -4,6 +4,15 @@
   var S = I18N.STR;
 
   Object.assign(S.et, {
+    'adv.title': '🎛️ Laiendatud juhtimine', 'adv.sub': 'Kõik on valikuline. Tühi väli = automaatne (tehisintellekt otsustab ise). Muudetud väljad lähevad otse tööle.',
+    'adv.count': '{n} muudetud', 'adv.reset': '↺ Lähtesta kõik', 'adv.preset.load': 'Laadi', 'adv.preset.del': 'Kustuta', 'adv.preset.save': 'Salvesta komplektina', 'adv.preset.name': 'Komplekti nimi', 'adv.preset.none': '— minu komplektid —', 'adv.preset.saved': 'Komplekt salvestatud!',
+    'adv.mix.sum': 'Ülesandeid kokku: {n} (see ületab ülesannete arvu välja)',
+    'lvl.b1': 'Väga kerge', 'lvl.b2': 'Kerge', 'lvl.b3': 'Keskmine', 'lvl.b4': 'Raske', 'lvl.b5': 'Väga raske',
+    'lvl.d1': 'Väikesed sammud, palju näiteid ja tuge.', 'lvl.d2': 'Selged ülesanded, abi ja näited.', 'lvl.d3': 'Tavaline selle klassi tasemel.', 'lvl.d4': 'Nõuab mõtlemist ja põhjendamist.', 'lvl.d5': 'Olümpiaadi stiil, mitmeastmeline mõtlemine.',
+    'sum.title': 'Kokkuvõte', 'sum.level': 'raskus {n}/10', 'sum.adv': '{n} lisaseadet', 'sum.slides': 'slaidi', 'sum.tasks': 'ülesannet', 'adv.reset.done': 'Kõik seaded on lähtestatud.',
+    'tr.title': '📲 Teine seade', 'tr.sub': 'Võtmed jäävad ühte brauserisse. Et sama töötaks õpetaja telefonis, kopeeri siin ülekandekood ja kleebi see seal.',
+    'tr.copy': 'Kopeeri ülekandekood', 'tr.show': 'Näita koodi', 'tr.warn': '⚠️ Kood sisaldab sinu võtmeid. Saada see ainult endale või inimesele, keda usaldad.',
+    'tr.in': 'Kleebi siia teisest seadmest saadud kood', 'tr.inph': 'OA1.…', 'tr.import': 'Võta seaded kasutusele', 'tr.ok': 'Valmis! Seaded ja võtmed on sellel seadmel.', 'tr.bad': 'Kood ei sobi. Kopeeri see uuesti tervikuna.', 'tr.copied': 'Kood kopeeritud!',
     'nav.history': 'Tööd', 'hist.title': 'Minu tööd', 'hist.sub': 'Viimased valmis tööd on siin sinu brauseris (neid ei saadeta kuhugi).', 'hist.empty': 'Siin pole veel midagi. Tee oma esimene töö!', 'hist.open': 'Ava', 'hist.clear': 'Tühjenda ajalugu',
     'load.refine': 'Muudan tööd …',
     'wt.plan': 'Tunnikava', 'wt.cards': 'Õppekaardid', 'wt.letter': 'Kiri lapsevanemale', 'wt.rubric': 'Hindamismaatriks',
@@ -53,6 +62,15 @@
     'toast.saved': 'Fail salvestatud!'
   });
   Object.assign(S.ru, {
+    'adv.title': '🎛️ Расширенное управление', 'adv.sub': 'Всё по желанию. Пустое поле = автоматически (ИИ решает сам). Изменённые поля сразу идут в работу.',
+    'adv.count': 'изменено: {n}', 'adv.reset': '↺ Сбросить всё', 'adv.preset.load': 'Загрузить', 'adv.preset.del': 'Удалить', 'adv.preset.save': 'Сохранить как набор', 'adv.preset.name': 'Название набора', 'adv.preset.none': '— мои наборы —', 'adv.preset.saved': 'Набор сохранён!',
+    'adv.mix.sum': 'Всего заданий: {n} (это важнее поля «количество заданий»)',
+    'lvl.b1': 'Очень лёгкая', 'lvl.b2': 'Лёгкая', 'lvl.b3': 'Средняя', 'lvl.b4': 'Сложная', 'lvl.b5': 'Очень сложная',
+    'lvl.d1': 'Маленькие шаги, много примеров и подсказок.', 'lvl.d2': 'Понятные задания, помощь и примеры.', 'lvl.d3': 'Обычный уровень для этого класса.', 'lvl.d4': 'Нужно думать и обосновывать.', 'lvl.d5': 'Как на олимпиаде, многошаговые рассуждения.',
+    'sum.title': 'Сводка', 'sum.level': 'сложность {n}/10', 'sum.adv': 'доп. настроек: {n}', 'sum.slides': 'слайдов', 'sum.tasks': 'заданий', 'adv.reset.done': 'Все настройки сброшены.',
+    'tr.title': '📲 Другое устройство', 'tr.sub': 'Ключи хранятся в одном браузере. Чтобы то же самое работало на телефоне учительницы, скопируйте здесь код переноса и вставьте его там.',
+    'tr.copy': 'Скопировать код переноса', 'tr.show': 'Показать код', 'tr.warn': '⚠️ В коде лежат ваши ключи. Отправляйте его только себе или человеку, которому доверяете.',
+    'tr.in': 'Вставьте сюда код с другого устройства', 'tr.inph': 'OA1.…', 'tr.import': 'Применить настройки', 'tr.ok': 'Готово! Настройки и ключи теперь на этом устройстве.', 'tr.bad': 'Код не подходит. Скопируйте его ещё раз целиком.', 'tr.copied': 'Код скопирован!',
     'nav.history': 'Работы', 'hist.title': 'Мои работы', 'hist.sub': 'Последние готовые работы хранятся здесь, в вашем браузере (никуда не отправляются).', 'hist.empty': 'Здесь пока пусто. Сделайте свою первую работу!', 'hist.open': 'Открыть', 'hist.clear': 'Очистить историю',
     'load.refine': 'Меняю работу …',
     'wt.plan': 'План урока', 'wt.cards': 'Карточки', 'wt.letter': 'Письмо родителям', 'wt.rubric': 'Критерии оценивания',
@@ -102,6 +120,15 @@
     'toast.saved': 'Файл сохранён!'
   });
   Object.assign(S.en, {
+    'adv.title': '🎛️ Advanced control', 'adv.sub': 'Everything is optional. An empty field = automatic (the AI decides). Changed fields go straight into the work.',
+    'adv.count': '{n} changed', 'adv.reset': '↺ Reset all', 'adv.preset.load': 'Load', 'adv.preset.del': 'Delete', 'adv.preset.save': 'Save as a set', 'adv.preset.name': 'Name of the set', 'adv.preset.none': '— my sets —', 'adv.preset.saved': 'Set saved!',
+    'adv.mix.sum': 'Total tasks: {n} (this overrides the number-of-tasks field)',
+    'lvl.b1': 'Very easy', 'lvl.b2': 'Easy', 'lvl.b3': 'Medium', 'lvl.b4': 'Hard', 'lvl.b5': 'Very hard',
+    'lvl.d1': 'Tiny steps, lots of examples and support.', 'lvl.d2': 'Clear tasks with help and examples.', 'lvl.d3': 'Typical for this grade.', 'lvl.d4': 'Needs thinking and reasoning.', 'lvl.d5': 'Olympiad style, multi-step reasoning.',
+    'sum.title': 'Summary', 'sum.level': 'difficulty {n}/10', 'sum.adv': '{n} extra settings', 'sum.slides': 'slides', 'sum.tasks': 'tasks', 'adv.reset.done': 'All settings reset.',
+    'tr.title': '📲 Another device', 'tr.sub': 'Keys stay in one browser. To make the same thing work on the teacher’s phone, copy a transfer code here and paste it there.',
+    'tr.copy': 'Copy transfer code', 'tr.show': 'Show the code', 'tr.warn': '⚠️ The code contains your keys. Send it only to yourself or to someone you trust.',
+    'tr.in': 'Paste the code from the other device here', 'tr.inph': 'OA1.…', 'tr.import': 'Apply the settings', 'tr.ok': 'Done! The settings and keys are now on this device.', 'tr.bad': 'The code does not fit. Copy it again, all of it.', 'tr.copied': 'Code copied!',
     'nav.history': 'My work', 'hist.title': 'My works', 'hist.sub': 'Your latest finished works are kept here in your browser (they are not sent anywhere).', 'hist.empty': 'Nothing here yet. Make your first work!', 'hist.open': 'Open', 'hist.clear': 'Clear history',
     'load.refine': 'Changing the work …',
     'wt.plan': 'Lesson plan', 'wt.cards': 'Flashcards', 'wt.letter': 'Letter to parents', 'wt.rubric': 'Rubric',
@@ -157,4 +184,8 @@
   Object.assign(I18N.OUT.et.work, { plan: 'Tunnikava', cards: 'Õppekaardid', letter: 'Kiri lapsevanemale', rubric: 'Hindamismaatriks' });
   Object.assign(I18N.OUT.ru.work, { plan: 'План урока', cards: 'Карточки', letter: 'Письмо родителям', rubric: 'Критерии оценивания' });
   Object.assign(I18N.OUT.en.work, { plan: 'Lesson plan', cards: 'Flashcards', letter: 'Letter to parents', rubric: 'Rubric' });
+
+  Object.assign(I18N.OUT.et, { hint: 'Vihje' });
+  Object.assign(I18N.OUT.ru, { hint: 'Подсказка' });
+  Object.assign(I18N.OUT.en, { hint: 'Hint' });
 })();

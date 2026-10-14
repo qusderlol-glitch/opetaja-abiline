@@ -22,7 +22,7 @@
 
   /* ------------------------------------------------------------------ storage */
   var DEFAULTS = {
-    name: '', ui: 'et', outLang: 'et', outTouched: false, fmt: 'pptx', prov: 'gemini', wtype: 'lesson', diff: 'medium', theme: 'rose',
+    name: '', ui: 'et', outLang: 'et', outTouched: false, fmt: 'pptx', prov: 'gemini', wtype: 'lesson', level: 5, adv: {}, advGroup: 'general', theme: 'rose',
     keyMode: '', school: '', grade: '6', subject: 'math', answers: true, remember: true, welcomed: false, tutorialSeen: false,
     models: JSON.parse(JSON.stringify(AI.DEFAULT_MODELS)),
     music: { track: 0, volume: 0.5, load: true, keep: false }
@@ -40,6 +40,10 @@
         if (k === 'models' || k === 'music') Object.assign(s[k], raw[k]); else s[k] = raw[k];
       });
     } catch (e) { /* ignore */ }
+    if (s.diff && !(parseInt(s.level, 10) >= 1)) s.level = { easy: 3, medium: 5, hard: 8 }[s.diff] || 5;   // old three-step choice
+    delete s.diff;
+    s.level = Math.max(1, Math.min(10, parseInt(s.level, 10) || 5));
+    if (!s.adv || typeof s.adv !== 'object' || Array.isArray(s.adv)) s.adv = {};
     return s;
   }
   function saveSettings() { lsSet(localStorage, 'oa.settings', JSON.stringify(S)); }
@@ -145,7 +149,7 @@
 
     renderTopicChips();
     updateFormatUI();
-    $$('#diffSeg button').forEach(function (b) { b.classList.toggle('active', b.dataset.diff === S.diff); });
+    renderLevel();
     $$('#providerSeg button').forEach(function (b) { b.classList.toggle('active', b.dataset.prov === S.prov); });
     $$('#uiLang button, #homeLang button').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === S.ui); });
   }
@@ -171,7 +175,107 @@
     }).join('');
     $('#typeDesc').textContent = t('wt.' + S.wtype + '.d');
     updateKeyHint();
+    renderAdv();
   }
+
+  /* ------------------------------------------------------------------ difficulty 1-10 (slider + number + quick buttons) */
+  var LEVEL_PRESET = { easy: 3, medium: 5, hard: 8 };
+  function clampLevel(n) { n = parseInt(n, 10); return isFinite(n) ? Math.max(1, Math.min(10, n)) : null; }
+  function setLevel(n, fromNumberBox) {
+    n = clampLevel(n); if (n === null) return;
+    S.level = n; saveSettings();
+    $('#fLevel').value = n;
+    if (!fromNumberBox) $('#fLevelNum').value = n;
+    showLevelText();
+    updateSummary();
+  }
+  function showLevelText() {
+    var k = Math.ceil(S.level / 2);
+    $('#levelText').innerHTML = '<b>' + esc(t('lvl.b' + k)) + '.</b> ' + esc(t('lvl.d' + k));
+    $('#levelText').className = 'level-text lv' + k;
+    $('#fLevel').style.setProperty('--lv', ((S.level - 1) / 9 * 100).toFixed(0) + '%');
+    $$('#diffSeg button').forEach(function (b) { b.classList.toggle('active', LEVEL_PRESET[b.dataset.diff] === S.level); });
+  }
+  function renderLevel() { $('#fLevel').value = S.level; $('#fLevelNum').value = S.level; showLevelText(); }
+  function diffOf(n) { return n <= 3 ? 'easy' : (n >= 8 ? 'hard' : 'medium'); }
+
+  /* ------------------------------------------------------------------ advanced control */
+  function cloneJson(o) { return JSON.parse(JSON.stringify(o || {})); }
+  function renderAdv() {
+    var r = Adv.render(S.adv, S.fmt, S.wtype, S.ui, S.advGroup);
+    S.advGroup = r.group || S.advGroup;
+    $('#advBody').innerHTML = r.html || '';
+    refreshAdvPresets();
+    refreshAdvMeta();
+  }
+  function refreshAdvMeta() {
+    var info = Adv.groupsInfo(S.adv, S.fmt, S.wtype), total = 0;
+    info.forEach(function (g) {
+      total += g.n;
+      var b = document.querySelector('[data-advtab="' + g.id + '"]'); if (!b) return;
+      var dot = b.querySelector('.adv-dot');
+      if (g.n) { if (!dot) { dot = document.createElement('i'); dot.className = 'adv-dot'; b.appendChild(dot); } dot.textContent = g.n; }
+      else if (dot) dot.remove();
+    });
+    var c = $('#advCount');
+    c.textContent = total ? t('adv.count', { n: total }) : ''; c.classList.toggle('hidden', !total);
+    var mt = Adv.mixTotal(S.adv), ms = $('#advMixSum');
+    if (ms) ms.textContent = mt ? t('adv.mix.sum', { n: mt }) : '';
+    S.advChanged = total;
+    updateSummary();
+  }
+  function refreshAdvPresets() {
+    var names = Object.keys(Adv.presets());
+    $('#advPresetSel').innerHTML = names.map(function (n) { return '<option value="' + esc(n) + '">' + esc(n) + '</option>'; }).join('');
+    ['#advPresetSel', '#advPresetLoad', '#advPresetDel'].forEach(function (id) { $(id).classList.toggle('hidden', !names.length); });
+  }
+  function onAdvInput(el) {
+    var id = el.dataset.adv;
+    S.adv[id] = el.type === 'checkbox' ? el.checked : el.value;
+    saveSettings(); refreshAdvMeta();
+  }
+
+  function updateSummary() {
+    var el = $('#sumLine'); if (!el) return;
+    var plain = isPlain(), parts = [t('wt.' + S.wtype)];
+    parts.push(t('grade.n', { n: parseInt($('#fGrade').value, 10) || S.grade }));
+    var sj = $('#fSubject').value; if (sj) parts.push(t('subj.' + sj));
+    if (!(S.wtype === 'letter' && plain)) parts.push(t('sum.level', { n: S.level }));
+    var mt = Adv.mixTotal(S.adv);
+    var cnt = mt || parseInt($('#fCount').value, 10);
+    if (cnt && !(S.wtype === 'letter' && plain)) parts.push(cnt + ' ' + t(countCfg().label === 'f.count.slides' ? 'sum.slides' : 'sum.tasks'));
+    if (S.advChanged) parts.push(t('sum.adv', { n: S.advChanged }));
+    el.innerHTML = '<span class="sum-h">' + esc(t('sum.title')) + '</span> ' + parts.map(esc).join(' · ');
+  }
+
+  /* ------------------------------------------------------------------ transfer code (keys and settings to another device) */
+  function b64enc(str) { return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function b64dec(b) { b = b.replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '='; return decodeURIComponent(escape(atob(b))); }
+  function makeTransferCode() {
+    var settings = cloneJson(S); delete settings.advChanged;
+    return 'OA1.' + b64enc(JSON.stringify({ v: 1, s: settings, k: KEYS, p: Adv.presets() }));
+  }
+  function importTransferCode(code) {
+    code = String(code || '').replace(/\s+/g, '');
+    if (code.indexOf('OA1.') !== 0) throw new Error('bad');
+    var o = JSON.parse(b64dec(code.slice(4)));
+    if (!o || o.v !== 1 || typeof o.s !== 'object') throw new Error('bad');
+    var ns = cloneJson(DEFAULTS);
+    Object.keys(o.s).forEach(function (k) {
+      if (k === 'models' || k === 'music') Object.assign(ns[k], o.s[k]); else ns[k] = o.s[k];
+    });
+    ns.level = clampLevel(ns.level) || 5;
+    if (!ns.adv || typeof ns.adv !== 'object') ns.adv = {};
+    ns.welcomed = true; ns.tutorialSeen = true;
+    Object.keys(S).forEach(function (k) { delete S[k]; });
+    Object.assign(S, ns);
+    var nk = { claude: ['', ''], openai: ['', ''], gemini: ['', ''] };
+    PROVIDERS.forEach(function (p) { if (o.k && Array.isArray(o.k[p])) nk[p] = [cleanKey(o.k[p][0]), cleanKey(o.k[p][1])]; });
+    KEYS = nk;
+    if (o.p && typeof o.p === 'object') Adv.savePresets(o.p);
+    saveSettings(); saveKeys();
+  }
+
 
   function renderProvNote() {
     var el = $('#provNote'); if (!el) return;
@@ -438,7 +542,7 @@
     return {
       fmt: S.fmt, wtype: S.wtype, grade: parseInt($('#fGrade').value, 10) || 6, subjectId: subjectId,
       subjectName: I18N.t('subj.' + subjectId, null, outLang),
-      topic: $('#fTopic').value.trim(), extra: $('#fExtra').value.trim(), diff: S.diff, count: count,
+      topic: $('#fTopic').value.trim(), extra: $('#fExtra').value.trim(), diff: diffOf(S.level), level: S.level, adv: Adv.collect(S.adv, S.fmt, S.wtype), count: count,
       outLang: outLang, theme: S.theme, school: $('#fSchool').value.trim(), answers: $('#fAnswers').checked,
       simple: $('#fSimple').checked, glossary: $('#fGlossary').checked, variantB: $('#fVariantB').checked && !$('#rowVariantB').classList.contains('hidden'),
       source: $('#fSource').value.trim().slice(0, 8000), signer: S.name
@@ -461,6 +565,7 @@
     startLoading('load.title');
     try {
       var model = S.models[provider] || AI.DEFAULT_MODELS[provider], okFn = function (k) { lastGood[provider] = k; };
+      AI.setCreativity((opts.adv || {}).creativity);
       var r = await AI.generate(opts, provider, keys, model, ABORT.signal, null, okFn);
       var rb = null;
       if (opts.variantB) {
@@ -470,7 +575,7 @@
       }
       if (rb) { var baseTitle = r.title; r.title = baseTitle + ' (A)'; rb.title = baseTitle + ' (B)'; }
       setResults(r, rb);
-      historyAdd(opts);
+      historyAdd(opts); lsDel(localStorage, 'oa.draft');
       stopLoading(true);
       showResult(); confetti();
     } catch (e) {
@@ -496,6 +601,7 @@
     ABORT = new AbortController();
     startLoading('load.title.slide');
     try {
+      AI.setCreativity(((LAST_OPTS || {}).adv || {}).creativity);
       var s = await AI.regenSlide(RESULT, i, LAST_OPTS || readForm(), keys, S.models[prov] || AI.DEFAULT_MODELS[prov], ABORT.signal, null, function (k) { lastGood[prov] = k; }, prov);
       RESULT.slides[i] = s;
       stopLoading(true);
@@ -561,6 +667,7 @@
     ABORT = new AbortController();
     startLoading('load.refine');
     try {
+      AI.setCreativity((opts.adv || {}).creativity);
       var nr = await AI.refine(Preview.clean(RESULT), instruction, opts, prov, keys, S.models[prov] || AI.DEFAULT_MODELS[prov], ABORT.signal, null, function (k) { lastGood[prov] = k; });
       nr.title = nr.title || RESULT.title;
       if (RESULTS.A && RESULTS.B) nr.title = nr.title.replace(/\s*\([AB]\)$/, '') + ' (' + wasB + ')';
@@ -750,7 +857,9 @@
       var wt = el.closest('[data-wtype]');
       if (wt) { S.wtype = wt.dataset.wtype; saveSettings(); $('#fCount').value = countCfg().def; updateFormatUI(); return; }
       var df = el.closest('#diffSeg button');
-      if (df) { S.diff = df.dataset.diff; saveSettings(); $$('#diffSeg button').forEach(function (b) { b.classList.toggle('active', b === df); }); return; }
+      if (df) { setLevel(LEVEL_PRESET[df.dataset.diff]); return; }
+      var at = el.closest('[data-advtab]');
+      if (at) { S.advGroup = at.dataset.advtab; saveSettings(); renderAdv(); return; }
       var vb = el.closest('[data-var]');
       if (vb) { switchVariant(vb.dataset.var); return; }
       var rf = el.closest('[data-ref]');
@@ -877,6 +986,64 @@
       });
     });
 
+    /* difficulty: slider + number */
+    $('#fLevel').addEventListener('input', function () { setLevel(this.value); });
+    $('#fLevelNum').addEventListener('input', function () { var n = clampLevel(this.value); if (n !== null && String(n) === String(this.value).trim()) setLevel(n, true); });
+    $('#fLevelNum').addEventListener('change', function () { var n = clampLevel(this.value); setLevel(n === null ? S.level : n); });
+
+    /* advanced control */
+    var advBody = $('#advBody');
+    advBody.addEventListener('input', function (ev) { var el = ev.target.closest('[data-adv]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') onAdvInput(el); });
+    advBody.addEventListener('change', function (ev) { var el = ev.target.closest('[data-adv]'); if (el) onAdvInput(el); });
+    $('#advReset').addEventListener('click', function () { S.adv = {}; saveSettings(); renderAdv(); toast(t('adv.reset.done')); });
+    $('#advPresetSave').addEventListener('click', function () {
+      var name = $('#advPresetName').value.trim().slice(0, 30);
+      if (!name) { $('#advPresetName').focus(); return; }
+      var all = Adv.presets(); all[name] = cloneJson(S.adv); Adv.savePresets(all);
+      $('#advPresetName').value = ''; refreshAdvPresets(); $('#advPresetSel').value = name; toast(t('adv.preset.saved'));
+    });
+    $('#advPresetLoad').addEventListener('click', function () {
+      var all = Adv.presets(), n = $('#advPresetSel').value; if (!all[n]) return;
+      S.adv = cloneJson(all[n]); saveSettings(); renderAdv();
+    });
+    $('#advPresetDel').addEventListener('click', function () {
+      var all = Adv.presets(), n = $('#advPresetSel').value; if (!all[n]) return;
+      delete all[n]; Adv.savePresets(all); refreshAdvPresets();
+    });
+    ['#fCount'].forEach(function (id) { $(id).addEventListener('input', updateSummary); });
+    ['#fGrade', '#fSubject'].forEach(function (id) { $(id).addEventListener('change', updateSummary); });
+
+    /* the teacher's text is kept if the page is reloaded; Ctrl+Enter makes the work */
+    var draftT = null;
+    var saveDraft = function () {
+      clearTimeout(draftT);
+      draftT = setTimeout(function () { lsSet(localStorage, 'oa.draft', JSON.stringify({ topic: $('#fTopic').value, extra: $('#fExtra').value })); }, 400);
+    };
+    ['#fTopic', '#fExtra'].forEach(function (id) { $(id).addEventListener('input', saveDraft); });
+    ['#fTopic', '#fExtra', '#fSource'].forEach(function (id) {
+      $(id).addEventListener('keydown', function (ev) { if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') { ev.preventDefault(); rememberForm(); onMake(); } });
+    });
+
+    /* transfer code */
+    $('#btnTrCopy').addEventListener('click', function () {
+      var code = makeTransferCode(), box = $('#trOut'); box.value = code;
+      var done = function () { toast(t('tr.copied')); };
+      var fail = function () { show(box); box.focus(); box.select(); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, fail); else fail();
+    });
+    $('#btnTrShow').addEventListener('click', function () {
+      var box = $('#trOut'); box.value = makeTransferCode(); box.classList.toggle('hidden');
+    });
+    $('#btnTrImport').addEventListener('click', function () {
+      var msg = $('#trMsg');
+      try {
+        importTransferCode($('#trIn').value);
+        $('#trIn').value = ''; msg.textContent = t('tr.ok'); msg.className = 'fine ok';
+        $('#fOutLang').value = S.outLang; $('#fSchool').value = S.school; $('#fAnswers').checked = !!S.answers; $('#homeName').value = S.name;
+        applyLanguage(); buildSettings(); updateKeyHint();
+      } catch (er) { msg.textContent = t('tr.bad'); msg.className = 'fine bad'; }
+    });
+
     /* editing inside the preview */
     var pv = $('#preview');
     pv.addEventListener('input', function (ev) {
@@ -912,6 +1079,7 @@
     Music.setTrack(S.music.track || 0);
     $('#fOutLang').value = S.outLang; $('#fSchool').value = S.school; $('#fAnswers').checked = !!S.answers;
     fixWtype(); $('#fCount').value = countCfg().def;
+    try { var dr = JSON.parse(lsGet(localStorage, 'oa.draft') || '{}'); if (dr.topic) $('#fTopic').value = String(dr.topic).slice(0, 200); if (dr.extra) $('#fExtra').value = String(dr.extra).slice(0, 1000); } catch (e) { /* ignore */ }
     I18N.applyStatic();
     renderGreeting(); renderForm(); renderMusicUI();
     $('#fGrade').value = S.grade; $('#fSubject').value = S.subject; renderTopicChips();
