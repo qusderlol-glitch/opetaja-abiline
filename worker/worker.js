@@ -12,7 +12,24 @@ const DEFAULTS = {
   TRY_MS: '35000'
 };
 
-const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash'];
+
+/* ask Google which flash models this key can really use (cached for a while), newest first */
+let modelCache = { at: 0, list: [] };
+async function discoverModels(env) {
+  if (Date.now() - modelCache.at < 3600000 && modelCache.list.length) return modelCache.list;
+  try {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': env.GEMINI_KEY } });
+    if (!res.ok) return modelCache.list;
+    const data = await res.json();
+    const list = (data.models || []).filter(function (m) {
+      return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0 && /flash/.test(m.name) && !/lite|image|tts|live|audio|native|embed|robotics|omni|preview-\d/.test(m.name);
+    }).map(function (m) { return m.name.replace(/^models\//, ''); });
+    list.sort(function (a, b) { return b.localeCompare(a, undefined, { numeric: true }); });
+    modelCache = { at: Date.now(), list: list.slice(0, 4) };
+  } catch (e) { /* keep the old list */ }
+  return modelCache.list;
+}
 
 function cfg(env, k) { return (env && env[k] !== undefined && env[k] !== '') ? String(env[k]) : DEFAULTS[k]; }
 
@@ -95,22 +112,38 @@ export default {
       generationConfig: Object.assign({ responseMimeType: 'application/json', maxOutputTokens: maxTokens }, temperature !== null ? { temperature: temperature } : {})
     };
 
-    const queue = [cfg(env, 'MODEL')].concat(FALLBACK_MODELS).filter(function (m, i, a) { return a.indexOf(m) === i; });
-    let last = null;
-    for (const model of queue) {
-      const r = await callGemini(env, model, geminiBody);
-      if (r.status === 200 && r.data) {
-        const parts = r.data.candidates && r.data.candidates[0] && r.data.candidates[0].content && r.data.candidates[0].content.parts;
-        const text = (parts || []).map(function (p) { return p.text || ''; }).join('');
-        if (text) return json({ text: text, model: model }, 200, cors);
+    const tried = [];
+    let queue = [cfg(env, 'MODEL')].concat(FALLBACK_MODELS).filter(function (m, i, a) { return a.indexOf(m) === i; });
+    let last = null, discovered = false, busy = {};
+    for (let pass = 0; pass < 2; pass++) {
+      if (pass === 1) {   // Google had a spike of demand: give the busy models one more chance after a short pause
+        const again = Object.keys(busy);
+        if (!again.length) break;
+        await new Promise(function (ok) { setTimeout(ok, 3000); });
+        queue = again; busy = {};
       }
-      last = r;
-      if (r.status === 400 || r.status === 401 || r.status === 403) break;   // our key is broken: other models will not help
+      for (let qi = 0; qi < queue.length; qi++) {
+        const model = queue[qi];
+        const r = await callGemini(env, model, geminiBody);
+        tried.push(model + ':' + r.status);
+        if (r.status === 200 && r.data) {
+          const parts = r.data.candidates && r.data.candidates[0] && r.data.candidates[0].content && r.data.candidates[0].content.parts;
+          const text = (parts || []).map(function (p) { return p.text || ''; }).join('');
+          if (text) return json({ text: text, model: model }, 200, cors);
+        }
+        last = r;
+        if (r.status === 503 || r.status === 500 || r.status === 0) busy[model] = 1;
+        if (pass === 0 && qi === queue.length - 1 && !discovered) {   // the usual names did not work: ask Google what is available now
+          discovered = true;
+          (await discoverModels(env)).forEach(function (m) { if (queue.indexOf(m) < 0) queue.push(m); });
+        }
+        if (r.status === 400 || r.status === 401 || r.status === 403) { busy = {}; pass = 9; break; }   // our key is broken: other models will not help
+      }
     }
 
     // nothing worked: give the teacher's count back, it was not her fault
     if (kv) { try { await Promise.all([setCount(kv, ipKey, ipN), setCount(kv, totalKey, totalN)]); } catch (e) { /* ignore */ } }
     if (last && last.status === 429) return json({ error: { message: 'LIMIT_GOOGLE: Gemini free quota is used up for now' } }, 429, cors);
-    return json({ error: { message: 'Gemini is busy: ' + (last ? last.status + ' ' + last.raw : 'no answer') } }, 503, cors);
+    return json({ error: { message: 'Gemini is busy: ' + (last ? last.status + ' ' + last.raw : 'no answer') + ' [tried ' + tried.join(', ') + ']' } }, 503, cors);
   }
 };
