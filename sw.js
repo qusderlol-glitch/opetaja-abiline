@@ -1,8 +1,8 @@
 /* Õpetaja Abiline – service worker: the app opens offline. Network first, cache as a fallback.
    API calls (other origins) are never cached. */
-var CACHE = 'oa-v1';
+var CACHE = 'oa-v3';
 var CORE = ['./', 'index.html', 'css/fonts.css', 'css/style.css', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/apple-touch-icon.png',
-  'js/i18n.js', 'js/i18n-ui.js', 'js/i18n-more.js', 'js/music.js', 'js/ai.js', 'js/build.js', 'js/preview.js', 'js/demo.js', 'js/tour.js', 'js/app.js'];
+  'js/config.js', 'js/i18n.js', 'js/i18n-ui.js', 'js/i18n-more.js', 'js/music.js', 'js/ai.js', 'js/build.js', 'js/preview.js', 'js/demo.js', 'js/tour.js', 'js/app.js'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return Promise.all(CORE.map(function (u) { return c.add(u).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));

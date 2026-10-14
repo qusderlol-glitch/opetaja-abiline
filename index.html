@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com https://*.workers.dev; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Õpetaja Abiline 🌹</title>
 <meta name="description" content="Õpetaja Abiline · Помощник учителя · Teacher's Helper – PowerPoint, Word, Excel">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B9%3C/text%3E%3C/svg%3E">
@@ -58,6 +58,18 @@
       <path d="M22.5 23.5 L41 42 M33 33 l5.5 -5.5 M38 38 l4.5 -4.5"/></g></symbol>
     <symbol id="i-check" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="24" cy="24" r="17" style="fill:var(--f-mint,#bfead6)"/><path d="M15 25 L22 32 L34 16" stroke-width="4"/></g></symbol>
+    <symbol id="i-book" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 11 Q8 8.5 10.5 8.5 H24 V39.5 H10.5 Q8 39.5 8 37 Z" style="fill:var(--f-sun,#fff0b3)"/>
+      <path d="M40 11 Q40 8.5 37.5 8.5 H24 V39.5 H37.5 Q40 39.5 40 37 Z" style="fill:#fff"/><path d="M13 16 H19 M13 22 H19 M29 16 H35 M29 22 H35"/></g></symbol>
+    <symbol id="i-roosi" viewBox="0 0 140 190"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M70 184 C70 152 68 132 70 106" stroke="#5aa883" stroke-width="6"/>
+      <path class="arm-l" d="M70 154 C48 144 32 148 22 160 C44 170 62 168 70 154z" fill="#bfead6" stroke="#5aa883" stroke-width="3.5"/>
+      <path class="arm-r" d="M70 138 C92 126 110 128 120 140 C98 152 80 150 70 138z" fill="#bfead6" stroke="#5aa883" stroke-width="3.5"/>
+      <path d="M70 108 C38 108 24 72 46 54 C58 44 82 44 94 54 C116 72 102 108 70 108z" fill="#ffd3de" stroke="#e56b8c" stroke-width="4.5"/>
+      <path d="M58 52 C60 46 70 44 78 48 C84 51 86 56 84 60" stroke="#e56b8c" stroke-width="3.6"/>
+      <ellipse cx="48" cy="86" rx="7" ry="4.5" fill="#f59ab2" stroke="none" opacity=".65"/><ellipse cx="92" cy="86" rx="7" ry="4.5" fill="#f59ab2" stroke="none" opacity=".65"/>
+      <circle class="eye" cx="58" cy="78" r="4.2" fill="#5a3b4b" stroke="none"/><circle class="eye" cx="82" cy="78" r="4.2" fill="#5a3b4b" stroke="none"/>
+      <path d="M61 88 Q70 98 79 88" stroke="#5a3b4b" stroke-width="3.6"/></g></symbol>
     <symbol id="i-rose" viewBox="56 40 88 116"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path d="M100 152 C100 122 98 102 100 80" stroke="#5aa883" stroke-width="5"/>
       <path d="M100 122 C80 114 70 120 66 130 C82 136 94 132 100 122z" fill="#bfead6" stroke="#5aa883" stroke-width="3"/>
@@ -96,6 +108,7 @@
   <button class="tab active" id="navHome" data-go="home"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg><span data-i18n="nav.home"></span></button>
   <button class="tab" id="navMake" data-go="make"><svg class="ico" aria-hidden="true"><use href="#i-wand"/></svg><span data-i18n="nav.make"></span></button>
   <button class="tab off" id="navResult" data-go="result"><svg class="ico" aria-hidden="true"><use href="#i-doc"/></svg><span data-i18n="nav.result"></span></button>
+  <button class="tab" id="navHistory" data-go="history"><svg class="ico" aria-hidden="true"><use href="#i-book"/></svg><span data-i18n="nav.history"></span></button>
   <button class="tab" id="navSettings" data-go="settings"><svg class="ico" aria-hidden="true"><use href="#i-gear"/></svg><span data-i18n="nav.settings"></span></button>
   <button class="tab" id="navHelp" data-go="help"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg><span data-i18n="nav.help"></span></button>
 </nav>
@@ -106,7 +119,7 @@
   <section id="sec-home" class="sec">
     <div class="hero card tilt-l">
       <span class="tape"></span>
-      <svg class="hero-art" aria-hidden="true"><use href="#i-rose"/></svg>
+      <svg class="hero-art mascot" viewBox="0 0 140 190" aria-hidden="true"><use href="#i-roosi"/></svg>
       <h1 id="greeting" class="hl">Tere!</h1>
       <p class="lead" data-i18n="welcome.sub"></p>
       <label class="field"><span data-i18n="welcome.name"></span>
@@ -200,10 +213,22 @@
           <input id="fTopic" type="text" maxlength="200" autocomplete="off" data-i18n-ph="f.topicPh">
         </label>
         <div class="chips small" id="topicChips"></div>
+        <button type="button" class="mini dice" id="btnDice" data-i18n="dice"></button>
 
         <label class="field"><span data-i18n="f.extra"></span>
           <textarea id="fExtra" rows="2" maxlength="800" data-i18n-ph="f.extraPh"></textarea>
         </label>
+
+        <details class="more" id="srcBox">
+          <summary data-i18n="f.source"></summary>
+          <textarea id="fSource" rows="5" maxlength="8000" data-i18n-ph="f.source.ph"></textarea>
+          <div class="src-row">
+            <button type="button" class="mini" id="btnSrcFile" data-i18n="f.source.file"></button>
+            <button type="button" class="mini" id="btnSrcClear" data-i18n="f.source.clear"></button>
+            <input id="srcFile" type="file" accept=".txt,.md,text/plain" class="hidden">
+            <span class="fine" id="srcCount"></span>
+          </div>
+        </details>
 
         <div class="grid3">
           <div class="field"><span data-i18n="f.difficulty"></span>
@@ -223,6 +248,12 @@
               <option value="en">English</option>
             </select>
           </label>
+        </div>
+
+        <div class="opts-box"><span class="lbl" data-i18n="opt.title"></span>
+          <label class="check"><input id="fSimple" type="checkbox"><span data-i18n="opt.simple"></span></label>
+          <label class="check" id="rowGlossary"><input id="fGlossary" type="checkbox"><span data-i18n="opt.glossary"></span></label>
+          <label class="check" id="rowVariantB"><input id="fVariantB" type="checkbox"><span data-i18n="opt.variantB"></span></label>
         </div>
 
         <div id="themeRow" class="field"><span data-i18n="f.theme"></span>
@@ -258,16 +289,41 @@
       </div>
       <div class="rb-actions">
         <button id="btnDownload" class="btn primary"><span id="dlLabel"></span></button>
+        <button id="btnDownloadBoth" class="btn hidden" data-i18n="dl.both"></button>
         <button id="btnPresent" class="btn hidden" data-i18n="btn.present"></button>
         <button id="btnHtml" class="btn" data-i18n="btn.html"></button>
         <button id="btnPrint" class="btn" data-i18n="btn.print"></button>
         <button id="btnAgain" class="btn" data-i18n="btn.again"></button>
       </div>
     </div>
+    <div id="variantBar" class="seg variant-bar hidden">
+      <button type="button" data-var="A" data-i18n="var.a"></button><button type="button" data-var="B" data-i18n="var.b"></button>
+    </div>
     <p class="notice" data-i18n="res.hint"></p>
+    <details class="card refine-card tilt-l" id="refineCard">
+      <summary data-i18n="ref.title"></summary>
+      <div class="ref-btns">
+        <button type="button" class="chip" data-ref="simpler" data-i18n="ref.simpler"></button>
+        <button type="button" class="chip" data-ref="harder" data-i18n="ref.harder"></button>
+        <button type="button" class="chip" data-ref="shorter" data-i18n="ref.shorter"></button>
+        <button type="button" class="chip" data-ref="more" data-i18n="ref.more"></button>
+        <span class="ref-tr"><span data-i18n="ref.tr"></span>
+          <button type="button" class="mini" data-reftr="et">EE</button><button type="button" class="mini" data-reftr="ru">RU</button><button type="button" class="mini" data-reftr="en">EN</button></span>
+      </div>
+      <div class="ref-free"><input id="refText" type="text" maxlength="250" data-i18n-ph="ref.free.ph"><button id="refGo" type="button" class="btn" data-i18n="ref.go"></button></div>
+    </details>
     <div id="preview" class="preview"></div>
   </section>
 
+
+  <!-- ============ HISTORY ============ -->
+  <section id="sec-history" class="sec hidden">
+    <h1 class="hl page-title" data-i18n="hist.title"></h1>
+    <p class="soft" data-i18n="hist.sub"></p>
+    <div id="histEmpty" class="card tilt-r empty-card"><svg class="mascot" viewBox="0 0 140 190" aria-hidden="true"><use href="#i-roosi"/></svg><p data-i18n="hist.empty"></p></div>
+    <div id="histList"></div>
+    <button id="btnHistClear" class="btn small danger hidden" data-i18n="hist.clear"></button>
+  </section>
 
   <!-- ============ SETTINGS ============ -->
   <section id="sec-settings" class="sec hidden">
@@ -338,7 +394,7 @@
 </main>
 
 <footer class="foot">
-  <span data-i18n="foot.made"></span> 🌹💖
+  <svg class="foot-mascot mascot" viewBox="0 0 140 190" aria-hidden="true"><use href="#i-roosi"/></svg><span data-i18n="foot.made"></span> 🌹💖
 </footer>
 
 <!-- ============ LOADING ============ -->
@@ -354,6 +410,7 @@
           <path d="M100 70 C92 68 90 58 98 54 C102 52 106 54 108 58"/>
           <path d="M88 64 C90 58 96 56 100 58"/>
         </g>
+        <g class="face"><circle cx="93" cy="66" r="2.2" fill="#5a3b4b"/><circle cx="107" cy="66" r="2.2" fill="#5a3b4b"/><path d="M95 72 Q100 77 105 72" stroke="#5a3b4b" stroke-width="2.2"/></g>
         <path class="spark s1" d="M40 40l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#fff0b3" stroke="#e0a526" stroke-width="2"/>
         <path class="spark s2" d="M160 56l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#e6dcfa" stroke="#9a82d6" stroke-width="2"/>
         <path class="spark s3" d="M150 120l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#cfe6fb" stroke="#6f9fd9" stroke-width="2"/>
@@ -406,6 +463,7 @@
 
 <div id="toast" class="toast hidden" role="status"></div>
 
+<script src="js/config.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/i18n-ui.js"></script>
 <script src="js/i18n-more.js"></script>

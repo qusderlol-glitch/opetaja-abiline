@@ -156,15 +156,46 @@
     var ink = '3B2E33', grey = '8A7A80';
 
     var kids = [];
+    var plain = !!r.plain;
+    /* text with blank lines between paragraphs and single line breaks inside them */
+    function textParas(text, ro, po) {
+      return String(text).split(/\n\s*\n/).map(function (blk) {
+        var runs = blk.split('\n').map(function (ln, i) { return run(ln, Object.assign({}, ro, i ? { break: 1 } : {})); });
+        return para(runs, po);
+      });
+    }
+    function secTable(tb) {
+      var cols = tb.headers.length;
+      /* wider columns for longer texts */
+      var wts = tb.headers.map(function (h, c) {
+        var tot = String(h).length; tb.rows.forEach(function (row) { tot += String(row[c] || '').length; });
+        return Math.sqrt(tot / (tb.rows.length + 1) + 6);
+      });
+      var wsum = wts.reduce(function (a, b) { return a + b; }, 0);
+      var widths = wts.map(function (w) { return Math.max(900, Math.round(9500 * w / wsum)); });
+      var big = r.wtype === 'cards', size = cols >= 5 ? 19 : (big ? 28 : 21);
+      var mk = function (txt, head, first) {
+        return new D.TableCell({
+          children: [para([run(String(txt), { size: size, bold: !!head || (first && !big), color: head ? th.d : ink })], { alignment: head ? D.AlignmentType.CENTER : D.AlignmentType.LEFT })],
+          shading: head ? { type: D.ShadingType.CLEAR, fill: th.l, color: 'auto' } : (first && !big ? { type: D.ShadingType.CLEAR, fill: 'FBF7F4', color: 'auto' } : undefined),
+          margins: { top: big ? 160 : 70, bottom: big ? 160 : 70, left: 110, right: 110 }, verticalAlign: D.VerticalAlign.CENTER
+        });
+      };
+      var rows = [new D.TableRow({ tableHeader: true, cantSplit: true, children: tb.headers.map(function (h) { return mk(h, true); }) })].concat(
+        tb.rows.map(function (row) {
+          return new D.TableRow({ cantSplit: true, height: big ? { value: 900, rule: D.HeightRule.ATLEAST } : undefined, children: row.map(function (c, ci) { return mk(c, false, ci === 0); }) });
+        }));
+      return new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, columnWidths: widths, rows: rows });
+    }
     kids.push(para([run(r.title, { bold: true, size: 40, color: th.d })], { alignment: D.AlignmentType.CENTER, spacing: { after: 60 } }));
     if (r.subtitle) kids.push(para([run(r.subtitle, { size: 24, color: th.p })], { alignment: D.AlignmentType.CENTER, spacing: { after: 160 } }));
     var us = function (n) { return new Array(n + 1).join('_'); };
-    kids.push(para([run(L.name + ': ' + us(26) + '    ' + L.cls + ': ' + us(8) + '    ' + L.date + ': ' + us(12), { size: 22, color: ink })], { spacing: { before: 120, after: 120 } }));
+    if (!plain) kids.push(para([run(L.name + ': ' + us(26) + '    ' + L.cls + ': ' + us(8) + '    ' + L.date + ': ' + us(12), { size: 22, color: ink })], { spacing: { before: 120, after: 120 } }));
     var meta = [];
     if (r.minutes) meta.push(L.time + ': ' + r.minutes + ' ' + L.minutes);
     if (total) meta.push(L.total + ': ' + total + ' ' + L.points);
-    if (meta.length) kids.push(para([run(meta.join('   ·   '), { size: 20, color: grey, italics: true })], { spacing: { after: 160 } }));
-    if (r.instructions) {
+    if (meta.length && !plain) kids.push(para([run(meta.join('   ·   '), { size: 20, color: grey, italics: true })], { spacing: { after: 160 } }));
+    if (r.instructions && !plain) {
       kids.push(para([run(L.instructions + ': ', { bold: true, size: 22, color: th.d }), run(r.instructions, { size: 22, color: ink })], {
         shading: { type: D.ShadingType.CLEAR, fill: th.l, color: 'auto' },
         border: { left: { style: D.BorderStyle.SINGLE, size: 24, color: th.p, space: 8 } },
@@ -180,7 +211,8 @@
           border: { bottom: { style: D.BorderStyle.SINGLE, size: 8, color: th.p, space: 2 } }
         }));
       }
-      if (sec.text) kids.push(para([run(sec.text, { size: 22, color: ink, italics: true })], { spacing: { after: 160 } }));
+      if (sec.text) textParas(sec.text, { size: plain ? 24 : 22, color: ink, italics: !plain }, { spacing: { after: 160 } }).forEach(function (x) { kids.push(x); });
+      if (sec.table) { kids.push(secTable(sec.table)); kids.push(para([run('', { size: 12 })], { spacing: { after: 120 } })); }
       sec.tasks.forEach(function (t) {
         n++;
         var head = [run(n + '. ', { bold: true, size: 24, color: th.d }), run(t.text, { size: 24, color: ink })];
@@ -221,7 +253,7 @@
       }));
     }
 
-    if (r.includeAnswers) {
+    if (r.includeAnswers && !plain) {
       kids.push(new D.Paragraph({ children: [new D.PageBreak()] }));
       kids.push(para([run(L.answerKey, { bold: true, size: 34, color: th.d })], { spacing: { after: 200 }, border: { bottom: { style: D.BorderStyle.SINGLE, size: 8, color: th.p, space: 2 } } }));
       var k2 = 0;

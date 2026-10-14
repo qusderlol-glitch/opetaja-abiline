@@ -80,16 +80,22 @@
     var h = ['<article class="paper" style="' + vars(r) + '">'];
     h.push('<h2 class="p-title">' + ed(ctx, 'title', r.title) + '</h2>');
     if (r.subtitle) h.push('<p class="p-sub">' + ed(ctx, 'subtitle', r.subtitle) + '</p>');
-    h.push('<p class="p-name">' + e(L.name + ': ' + us(24) + '   ' + L.cls + ': ' + us(7) + '   ' + L.date + ': ' + us(11)) + '</p>');
+    if (!r.plain) h.push('<p class="p-name">' + e(L.name + ': ' + us(24) + '   ' + L.cls + ': ' + us(7) + '   ' + L.date + ': ' + us(11)) + '</p>');
     var meta = [];
     if (r.minutes) meta.push(e(L.time + ': ' + r.minutes + ' ' + L.minutes));
     if (total) meta.push(e(L.total + ': ' + total + ' ' + L.points));
     if (meta.length) h.push('<p class="p-meta">' + meta.join('  ·  ') + '</p>');
-    if (r.instructions) h.push('<div class="p-instr"><b>' + e(L.instructions) + ':</b> ' + ed(ctx, 'instructions', r.instructions) + '</div>');
+    if (r.instructions && !r.plain) h.push('<div class="p-instr"><b>' + e(L.instructions) + ':</b> ' + ed(ctx, 'instructions', r.instructions) + '</div>');
     var n = 0;
     r.sections.forEach(function (sec, si) {
       if (sec.heading) h.push('<h3 class="p-head">' + ed(ctx, 'sections.' + si + '.heading', sec.heading) + '</h3>');
-      if (sec.text) h.push('<p class="p-text">' + ed(ctx, 'sections.' + si + '.text', sec.text) + '</p>');
+      if (sec.text) h.push('<p class="p-text' + (r.plain ? ' plain' : '') + '">' + ed(ctx, 'sections.' + si + '.text', sec.text) + '</p>');
+      if (sec.table) {
+        var tb = sec.table;
+        h.push('<div class="p-tbl-wrap"><table class="p-tbl' + (r.wtype === 'cards' ? ' cards' : '') + '"><thead><tr>' + tb.headers.map(function (x) { return '<th>' + e(x) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+          tb.rows.map(function (row, ri) { return '<tr>' + tb.headers.map(function (_, c) { return '<td' + (c === 0 ? ' class="first"' : '') + '>' + ed(ctx, 'sections.' + si + '.table.rows.' + ri + '.' + c, row[c] || '') + '</td>'; }).join('') + '</tr>'; }).join('') +
+          '</tbody></table></div>');
+      }
       sec.tasks.forEach(function (t, ti) {
         n++;
         var base = 'sections.' + si + '.tasks.' + ti;
@@ -104,7 +110,7 @@
       h.push('<h4 class="p-scale">' + e(L.grading) + '</h4><table class="scale"><tr><th>' + e(L.range) + '</th><th>' + e(L.grade) + '</th></tr>' +
         r.scale.map(function (x) { return '<tr><td>' + e(x.range) + '</td><td>' + e(x.grade) + '</td></tr>'; }).join('') + '</table>');
     }
-    if (r.includeAnswers) {
+    if (r.includeAnswers && !r.plain) {
       h.push('<div class="p-key"><h3 class="p-head">' + e(L.answerKey) + '</h3>');
       var k2 = 0;
       r.sections.forEach(function (sec) { sec.tasks.forEach(function (t) { k2++; h.push('<div class="k"><b>' + k2 + '.</b> ' + e(Build.answerText(t, L) || '–') + '</div>'); }); });
@@ -218,7 +224,9 @@
     '.p-name{font-size:15px;margin:14px 0 6px;white-space:pre-wrap;word-break:break-all}.p-meta{font-size:13px;color:#8a7a80;font-style:italic;margin:0 0 12px}',
     '.p-instr{background:var(--l);border-left:6px solid var(--p);padding:9px 14px;margin:10px 0 18px;border-radius:3px}',
     '.p-head{margin:26px 0 10px;color:var(--d);font-size:21px;border-bottom:2px solid var(--p);padding-bottom:3px}',
-    '.p-text{font-style:italic;margin:6px 0 12px}.task{margin:14px 0}.t-head{display:block}.t-head b{color:var(--d)}',
+    '.p-text{font-style:italic;margin:6px 0 12px;white-space:pre-wrap}.p-text.plain{font-style:normal}',
+    '.p-tbl-wrap{overflow-x:auto;margin:8px 0 14px}.p-tbl{border-collapse:collapse;width:100%;font-size:14px}.p-tbl th{background:var(--l);color:var(--d);padding:7px 9px;border:1.5px solid #5a3b4b}.p-tbl td{border:1.5px solid #5a3b4b;padding:7px 9px;vertical-align:middle}.p-tbl td.first{font-weight:800;background:#fbf7f4}.p-tbl.cards td{font-size:17px;padding:16px 11px}.p-tbl.cards td.first{font-weight:400;background:#fff}',
+    '.task{margin:14px 0}.t-head{display:block}.t-head b{color:var(--d)}',
     '.pts{color:#8a7a80;font-size:12px}.opts{margin:4px 0 0 34px;line-height:1.7}',
     '.lines{margin:6px 0 0 22px}.line{height:30px;border-bottom:1.5px solid #c9bcc2}',
     '.p-scale{margin:28px 0 8px;color:var(--d);font-size:17px}.scale{border-collapse:collapse;min-width:260px}.scale th,.scale td{border:1.5px solid #5a3b4b;padding:5px 16px;text-align:center}.scale th{background:var(--l);color:var(--d)}',

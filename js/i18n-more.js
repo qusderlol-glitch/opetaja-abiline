@@ -4,6 +4,34 @@
   var S = I18N.STR;
 
   Object.assign(S.et, {
+    'nav.history': 'Tööd', 'hist.title': 'Minu tööd', 'hist.sub': 'Viimased valmis tööd on siin sinu brauseris (neid ei saadeta kuhugi).', 'hist.empty': 'Siin pole veel midagi. Tee oma esimene töö!', 'hist.open': 'Ava', 'hist.clear': 'Tühjenda ajalugu',
+    'load.refine': 'Muudan tööd …',
+    'wt.plan': 'Tunnikava', 'wt.cards': 'Õppekaardid', 'wt.letter': 'Kiri lapsevanemale', 'wt.rubric': 'Hindamismaatriks',
+    'wt.plan.d': 'Õpetajale: eesmärgid, tunni käik ajaga ja hindamine (Word).',
+    'wt.cards.d': 'Lõigatavad kaardid: mõiste ühel, vastus teisel poolel (Word).',
+    'wt.letter.d': 'Viisakas lühike kiri lapsevanematele (Word). Kirjuta alla soovi lahtrisse, miks kirjutad.',
+    'wt.rubric.d': 'Tabel: kriteeriumid ja tasemed suurepärasest nõrgani (Word).',
+    'f.count.stages': 'Tunni etappide arv', 'f.count.cards': 'Kaartide arv', 'f.count.criteria': 'Kriteeriumide arv',
+    'opt.title': 'Lisavalikud',
+    'opt.simple': 'Lihtsustatud keel (õpilastele, kes alles õpivad keelt)',
+    'opt.glossary': 'Lisa sõnastik (kahes keeles)',
+    'opt.variantB': 'Tee ka variant B (kõrvuti istujatele)',
+    'f.source': 'Oma tekst (valikuline)', 'f.source.ph': 'Kleebi siia tekst, mille põhjal töö tehakse. Siis kasutab tehisintellekt ainult seda.',
+    'f.source.file': '📄 Lae tekstifail (.txt)', 'f.source.clear': 'Tühjenda',
+    'dice': '🎲 Juhuslik teema',
+    'load.b': 'Teen varianti B …',
+    'var.a': 'Variant A', 'var.b': 'Variant B', 'dl.both': 'Laadi alla A + B',
+    'ref.title': '✨ Muuda tööd', 'ref.simpler': 'Lihtsamaks', 'ref.harder': 'Raskemaks', 'ref.shorter': 'Lühemaks', 'ref.more': '+ ülesandeid',
+    'ref.tr': 'Tõlgi:', 'ref.free.ph': 'Oma soov, nt „lisa rohkem näiteid“', 'ref.go': 'Muuda', 'ref.done': 'Töö on uuendatud!',
+    'ref.demo': 'Näidistööd ei saa muuta – tee esmalt päris töö.',
+    'mode.title': 'Kuidas soovid töötada?',
+    'mode.shared': '🌹 Saidi võti', 'mode.shared.d': 'Tasuta Gemini, oma võtit pole vaja. Päevas on piiratud arv töid.',
+    'mode.own': '🔑 Oma võti', 'mode.own.d': 'Kleebi oma võti. Piiranguid pole (Gemini, ChatGPT või Claude).',
+    'mode.shared.off': '⏳ Pole veel seadistatud – kasuta praegu oma võtit.',
+    'mode.shared.note': '🆓 Kasutad saidi Gemini’t. Võtit pole vaja. Kui päevane limiit saab täis, proovi homme või vaheta peale „Oma võti“.',
+    'home.key.shared': '✓ Saidi Gemini (võtit pole vaja)',
+    'err.limit': 'Saidi tasuta limiit on tänaseks täis.',
+    'err.hint.limit': 'Proovi homme või vali Seadetes „Oma võti“ (Gemini on tasuta).',
     'inst.title': '📱 Telefonis ja tahvelarvutis',
     'inst.sub': 'Lisa leht telefoni avaekraanile – siis avaneb see nagu päris rakendus.',
     'inst.ios.t': 'iPhone / iPad',
@@ -25,6 +53,34 @@
     'toast.saved': 'Fail salvestatud!'
   });
   Object.assign(S.ru, {
+    'nav.history': 'Работы', 'hist.title': 'Мои работы', 'hist.sub': 'Последние готовые работы хранятся здесь, в вашем браузере (никуда не отправляются).', 'hist.empty': 'Здесь пока пусто. Сделайте свою первую работу!', 'hist.open': 'Открыть', 'hist.clear': 'Очистить историю',
+    'load.refine': 'Меняю работу …',
+    'wt.plan': 'План урока', 'wt.cards': 'Карточки', 'wt.letter': 'Письмо родителям', 'wt.rubric': 'Критерии оценивания',
+    'wt.plan.d': 'Для учителя: цели, ход урока по времени и оценивание (Word).',
+    'wt.cards.d': 'Карточки для вырезания: понятие с одной стороны, ответ с другой (Word).',
+    'wt.letter.d': 'Вежливое короткое письмо родителям (Word). В поле пожеланий напишите, по какому поводу.',
+    'wt.rubric.d': 'Таблица: критерии и уровни от отличного до слабого (Word).',
+    'f.count.stages': 'Количество этапов урока', 'f.count.cards': 'Количество карточек', 'f.count.criteria': 'Количество критериев',
+    'opt.title': 'Дополнительно',
+    'opt.simple': 'Упрощённый язык (для тех, кто ещё учит язык)',
+    'opt.glossary': 'Добавить словарик (на двух языках)',
+    'opt.variantB': 'Сделать и вариант Б (для соседей по парте)',
+    'f.source': 'Свой текст (по желанию)', 'f.source.ph': 'Вставьте сюда текст, по которому нужно сделать работу. Тогда ИИ будет опираться только на него.',
+    'f.source.file': '📄 Загрузить текстовый файл (.txt)', 'f.source.clear': 'Очистить',
+    'dice': '🎲 Случайная тема',
+    'load.b': 'Делаю вариант Б …',
+    'var.a': 'Вариант А', 'var.b': 'Вариант Б', 'dl.both': 'Скачать А + Б',
+    'ref.title': '✨ Изменить работу', 'ref.simpler': 'Проще', 'ref.harder': 'Сложнее', 'ref.shorter': 'Короче', 'ref.more': '+ заданий',
+    'ref.tr': 'Перевести:', 'ref.free.ph': 'Своё пожелание, напр. «добавь больше примеров»', 'ref.go': 'Изменить', 'ref.done': 'Работа обновлена!',
+    'ref.demo': 'Демонстрационную работу изменить нельзя – сначала сделайте настоящую.',
+    'mode.title': 'Как будете работать?',
+    'mode.shared': '🌹 Ключ сайта', 'mode.shared.d': 'Бесплатный Gemini, свой ключ не нужен. В день есть лимит работ.',
+    'mode.own': '🔑 Свой ключ', 'mode.own.d': 'Вставьте свой ключ. Без ограничений (Gemini, ChatGPT или Claude).',
+    'mode.shared.off': '⏳ Пока не настроено – используйте свой ключ.',
+    'mode.shared.note': '🆓 Вы используете Gemini сайта. Ключ не нужен. Если дневной лимит закончится, попробуйте завтра или переключитесь на «Свой ключ».',
+    'home.key.shared': '✓ Gemini сайта (ключ не нужен)',
+    'err.limit': 'Бесплатный лимит сайта на сегодня закончился.',
+    'err.hint.limit': 'Попробуйте завтра или выберите в настройках «Свой ключ» (Gemini бесплатный).',
     'inst.title': '📱 На телефоне и планшете',
     'inst.sub': 'Добавьте сайт на главный экран телефона – он будет открываться как настоящее приложение.',
     'inst.ios.t': 'iPhone / iPad',
@@ -46,6 +102,34 @@
     'toast.saved': 'Файл сохранён!'
   });
   Object.assign(S.en, {
+    'nav.history': 'My work', 'hist.title': 'My works', 'hist.sub': 'Your latest finished works are kept here in your browser (they are not sent anywhere).', 'hist.empty': 'Nothing here yet. Make your first work!', 'hist.open': 'Open', 'hist.clear': 'Clear history',
+    'load.refine': 'Changing the work …',
+    'wt.plan': 'Lesson plan', 'wt.cards': 'Flashcards', 'wt.letter': 'Letter to parents', 'wt.rubric': 'Rubric',
+    'wt.plan.d': 'For the teacher: goals, a timed lesson flow and assessment (Word).',
+    'wt.cards.d': 'Cut-out cards: a term on one side, the answer on the other (Word).',
+    'wt.letter.d': 'A polite short letter to parents (Word). Write the reason in the wishes box.',
+    'wt.rubric.d': 'A table: criteria and levels from excellent to weak (Word).',
+    'f.count.stages': 'Number of lesson stages', 'f.count.cards': 'Number of cards', 'f.count.criteria': 'Number of criteria',
+    'opt.title': 'Extras',
+    'opt.simple': 'Simple language (for students still learning the language)',
+    'opt.glossary': 'Add a glossary (two languages)',
+    'opt.variantB': 'Also make variant B (for students sitting side by side)',
+    'f.source': 'Your own text (optional)', 'f.source.ph': 'Paste the text the work should be based on. The AI will then use only that.',
+    'f.source.file': '📄 Load a text file (.txt)', 'f.source.clear': 'Clear',
+    'dice': '🎲 Random topic',
+    'load.b': 'Making variant B …',
+    'var.a': 'Variant A', 'var.b': 'Variant B', 'dl.both': 'Download A + B',
+    'ref.title': '✨ Change the work', 'ref.simpler': 'Simpler', 'ref.harder': 'Harder', 'ref.shorter': 'Shorter', 'ref.more': '+ tasks',
+    'ref.tr': 'Translate:', 'ref.free.ph': 'Your own wish, e.g. “add more examples”', 'ref.go': 'Change', 'ref.done': 'The work was updated!',
+    'ref.demo': 'A sample work cannot be changed – make a real one first.',
+    'mode.title': 'How do you want to work?',
+    'mode.shared': '🌹 Site key', 'mode.shared.d': 'Free Gemini, no key of your own needed. There is a daily limit.',
+    'mode.own': '🔑 My own key', 'mode.own.d': 'Paste your own key. No limits (Gemini, ChatGPT or Claude).',
+    'mode.shared.off': '⏳ Not set up yet – use your own key for now.',
+    'mode.shared.note': '🆓 You are using the site’s Gemini. No key needed. If the daily limit runs out, try tomorrow or switch to “My own key”.',
+    'home.key.shared': '✓ Site Gemini (no key needed)',
+    'err.limit': 'The site’s free limit for today is used up.',
+    'err.hint.limit': 'Try tomorrow or choose “My own key” in Settings (Gemini is free).',
     'inst.title': '📱 On a phone or tablet',
     'inst.sub': 'Add the site to your home screen – it then opens like a real app.',
     'inst.ios.t': 'iPhone / iPad',
@@ -66,4 +150,11 @@
     'save.close': 'Close',
     'toast.saved': 'File saved!'
   });
+
+  Object.assign(I18N.OUT.et, { term: 'Mõiste', translation: 'Tõlge', glossary: 'Sõnastik' });
+  Object.assign(I18N.OUT.ru, { term: 'Термин', translation: 'Перевод', glossary: 'Словарик' });
+  Object.assign(I18N.OUT.en, { term: 'Term', translation: 'Translation', glossary: 'Glossary' });
+  Object.assign(I18N.OUT.et.work, { plan: 'Tunnikava', cards: 'Õppekaardid', letter: 'Kiri lapsevanemale', rubric: 'Hindamismaatriks' });
+  Object.assign(I18N.OUT.ru.work, { plan: 'План урока', cards: 'Карточки', letter: 'Письмо родителям', rubric: 'Критерии оценивания' });
+  Object.assign(I18N.OUT.en.work, { plan: 'Lesson plan', cards: 'Flashcards', letter: 'Letter to parents', rubric: 'Rubric' });
 })();

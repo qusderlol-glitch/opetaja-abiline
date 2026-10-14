@@ -1,0 +1,16 @@
+# Only needed if you deploy with the wrangler command line tool. The dashboard way is described in README.md.
+name = "opetaja-abiline"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# [[kv_namespaces]]
+# binding = "RATE"
+# id = "PUT-YOUR-KV-NAMESPACE-ID-HERE"
+
+# [vars]
+# DAY_LIMIT_IP = "30"
+# DAY_LIMIT_TOTAL = "250"
+# MODEL = "gemini-3.5-flash"
+
+# The Gemini key is a SECRET, never write it into this file:
+#   npx wrangler secret put GEMINI_KEY
